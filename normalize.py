@@ -25,8 +25,7 @@ def remove_empty_lines(text):
 
 
 def clang_format(text, filename):
-    """Auto-format C/C++ code with clang.  clang-format recognizes file formats
-    by name only, so we need to supply one."""
+    """Auto-format C/C++ code with clang."""
     p = Popen(["clang-format", "--style=llvm",
                f"--assume-filename={filename}"], stdin=PIPE, stdout=PIPE)
     return p.communicate(input=text.encode("UTF-8"))[0].decode('UTF-8')
@@ -44,8 +43,7 @@ def normalized_sha256(text, filename):
     return m.hexdigest()
 
 
-def sha256(filename):
-    blob = open(filename, "rb").read()
+def sha256(blob):
     m = hashlib.sha256()
     m.update(blob)
     return m.hexdigest()
@@ -59,10 +57,9 @@ if __name__ == "__main__":
         sys.exit(1)
     filename = sys.argv[1]
 
-    with open(filename, "r") as f:
-        text = f.read()
-        print("sha256:           ", sha256(filename))
-        print("normalized_sha256:", normalized_sha256(text, filename))
-
+    blob = open(filename, "rb").read()
+    text = blob.decode('UTF-8')
+    print("sha256:           ", sha256(blob))
+    print("normalized_sha256:", normalized_sha256(text, filename))
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
