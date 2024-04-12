@@ -12,8 +12,8 @@ parser = argparse.ArgumentParser(
         prog="identify.py",
         description="Identify embedded open-source libraries")
 parser.add_argument('-d',
-                    help="database path. Default: ./idlib.db",
-                    default="idlib.db", dest='db')
+                    help="database path. Default: ./idlib.sqlite",
+                    default="idlib.sqlite", dest='db')
 parser.add_argument("-s", "--summarize", action="store_true", dest="summarize",
                     help="don't report individual files, just the detected "
                     "libs and their most probable version respectively.")

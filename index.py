@@ -45,8 +45,8 @@ SourceInfo = collections.namedtuple(
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", help="database path. Default: ./idlib.db", dest="db",
-                    default='idlib.db')
+parser.add_argument("-d", help="database path. Default: ./idlib.sqlite", dest="db",
+                    default='idlib.sqlite')
 parser.add_argument("-l", "--library", help="index only a specific library")
 parser.add_argument("-v", "--verbose", action="store_true")
 args = parser.parse_args()
