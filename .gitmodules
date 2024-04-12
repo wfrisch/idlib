@@ -1,0 +1,132 @@
+[submodule "sources/zlib.git"]
+	path = libraries/zlib
+	url = https://github.com/madler/zlib
+[submodule "sources/openjpeg.git"]
+	path = libraries/openjpeg
+	url = https://github.com/uclouvain/openjpeg
+[submodule "libraries/tinyxml2.git"]
+	path = libraries/tinyxml2
+	url = https://github.com/leethomason/tinyxml2
+[submodule "libraries/libpng.git"]
+	path = libraries/libpng
+	url = https://github.com/pnggroup/libpng
+[submodule "libraries/libjpeg-turbo.git"]
+	path = libraries/libjpeg-turbo
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo
+[submodule "libraries/zstd.git"]
+	path = libraries/zstd
+	url = https://github.com/facebook/zstd
+[submodule "libraries/curl.git"]
+	path = libraries/curl
+	url = https://github.com/curl/curl
+[submodule "libraries/libuv.git"]
+	path = libraries/libuv
+	url = https://github.com/libuv/libuv
+[submodule "libraries/xz.git"]
+	path = libraries/xz
+	url = https://github.com/tukaani-project/xz
+[submodule "libraries/pcre2.git"]
+	path = libraries/pcre2
+	url = https://github.com/PCRE2Project/pcre2/
+[submodule "libraries/libnsgif.git"]
+	path = libraries/libnsgif
+	url = git://git.netsurf-browser.org/libnsgif.git
+[submodule "libraries/fatfs"]
+	path = libraries/fatfs
+	url = https://github.com/abbrev/fatfs
+[submodule "libraries/minizip-ng"]
+	path = libraries/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng
+[submodule "libraries/xxHash"]
+	path = libraries/xxHash
+	url = https://github.com/Cyan4973/xxHash
+[submodule "libraries/lua"]
+	path = libraries/lua
+	url = https://github.com/lua/lua
+[submodule "libraries/boringssl"]
+	path = libraries/boringssl
+	url = https://boringssl.googlesource.com/boringssl
+[submodule "libraries/ffmpeg"]
+	path = libraries/ffmpeg
+	url = https://git.ffmpeg.org/ffmpeg.git
+[submodule "libraries/flac"]
+	path = libraries/flac
+	url = https://github.com/xiph/flac
+[submodule "libraries/fmt"]
+	path = libraries/fmt
+	url = https://github.com/fmtlib/fmt
+[submodule "libraries/freetype"]
+	path = libraries/freetype
+	url = https://github.com/freetype/freetype
+[submodule "libraries/giflib"]
+	path = libraries/giflib
+	url = https://git.code.sf.net/p/giflib/code
+[submodule "libraries/harfbuzz"]
+	path = libraries/harfbuzz
+	url = https://github.com/harfbuzz/harfbuzz
+[submodule "libraries/hunspell"]
+	path = libraries/hunspell
+	url = https://github.com/hunspell/hunspell
+[submodule "libraries/libb2"]
+	path = libraries/libb2
+	url = https://github.com/BLAKE2/libb2
+[submodule "libraries/brotli"]
+	path = libraries/brotli
+	url = https://github.com/google/brotli
+[submodule "libraries/leveldb"]
+	path = libraries/leveldb
+	url = https://github.com/google/leveldb
+[submodule "libraries/libbpf"]
+	path = libraries/libbpf
+	url = https://github.com/libbpf/libbpf
+[submodule "libraries/protobuf"]
+	path = libraries/protobuf
+	url = https://github.com/protocolbuffers/protobuf/
+[submodule "libraries/uthash"]
+	path = libraries/uthash
+	url = https://github.com/troydhanson/uthash
+[submodule "libraries/uvwasi"]
+	path = libraries/uvwasi
+	url = https://github.com/nodejs/uvwasi
+[submodule "libraries/wlr-protocols"]
+	path = libraries/wlr-protocols
+	url = https://gitlab.freedesktop.org/wlroots/wlr-protocols
+[submodule "libraries/sqlite"]
+	path = libraries/sqlite
+	url = https://github.com/sqlite/sqlite
+[submodule "libraries/xz-embedded"]
+	path = libraries/xz-embedded
+	url = https://github.com/tukaani-project/xz-embedded
+[submodule "libraries/zlib"]
+	path = libraries/zlib
+	url = https://github.com/madler/zlib
+[submodule "libraries/openjpeg"]
+	path = libraries/openjpeg
+	url = https://github.com/uclouvain/openjpeg
+[submodule "libraries/tinyxml2"]
+	path = libraries/tinyxml2
+	url = https://github.com/leethomason/tinyxml2
+[submodule "libraries/libpng"]
+	path = libraries/libpng
+	url = https://github.com/pnggroup/libpng
+[submodule "libraries/libjpeg-turbo"]
+	path = libraries/libjpeg-turbo
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo
+[submodule "libraries/zstd"]
+	path = libraries/zstd
+	url = https://github.com/facebook/zstd
+[submodule "libraries/libuv"]
+	path = libraries/libuv
+	url = https://github.com/libuv/libuv
+[submodule "libraries/xz"]
+	path = libraries/xz
+	url = https://github.com/tukaani-project/xz
+[submodule "libraries/pcre2"]
+	path = libraries/pcre2
+	url = https://github.com/PCRE2Project/pcre2/
+[submodule "libraries/libnsgif"]
+	path = libraries/libnsgif
+	url = git://git.netsurf-browser.org/libnsgif.git
+[submodule "libraries/curl"]
+	path = libraries/curl
+	url = https://github.com/curl/curl
