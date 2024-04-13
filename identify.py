@@ -17,8 +17,8 @@ parser.add_argument('-d',
 parser.add_argument("-s", "--summarize", action="store_true", dest="summarize",
                     help="don't report individual files, just the detected "
                     "libs and their most probable version respectively.")
-parser.add_argument("--list-libraries", action="store_true",
-                    help="list all known libraries")
+# parser.add_argument("--list-libraries", action="store_true",
+#                     help="list all known libraries")
 parser.add_argument("directory",
                     help="directory containing the source code to search")
 args = parser.parse_args()
