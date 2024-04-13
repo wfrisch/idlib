@@ -20,17 +20,18 @@ def libpath(lib):
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
     sha256      TEXT PRIMARY KEY,
-    library     TEXT,
-    path        TEXT,
-    commit_hash TEXT,
-    commit_time TEXT,  -- ISO 8601 timestamp
-    description TEXT   -- `git describe` or fallback
+    library     TEXT,  -- name of the library
+    path        TEXT,  -- file path, at the time of the matched commit
+    commit_hash TEXT,  -- git commit that introduced this version
+    commit_time TEXT,  -- git commit timestamp (ISO 8601 format)
+    description TEXT   -- git describe for this commit,
+                       -- ... falls back to: 0^{date}.{commit_hash}
 );
 CREATE INDEX IF NOT EXISTS files_sha256_index ON files(sha256);
 
 CREATE TABLE IF NOT EXISTS libraries (  -- optional
     library     TEXT PRIMARY KEY,
-    git_remote  TEXT,  -- URI
+    git_remote  TEXT,  -- git remote URI
     summary     TEXT   -- short summary of the library
 );
 '''
