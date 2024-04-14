@@ -82,6 +82,7 @@ cur = con.executescript(SCHEMA)
 
 for lib in libraries:
     print(f"Indexing library: {lib.name}")
+    sys.stdout.flush()
     git = GitRepo(libpath(lib))
     sourceinfos = {}
     for foi in lib.files_of_interest:
@@ -111,5 +112,6 @@ for lib in libraries:
         cur.execute('''REPLACE INTO files VALUES (?,?,?,?,?,?)''', info)
     con.commit()
     print()
+    sys.stdout.flush()
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
