@@ -42,7 +42,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         release_name: Database Release ${{ github.run_number }}
-        tag_name: main
+        tag_name: db_release-${{ github.run_number }}
         draft: false
         prerelease: false
 
