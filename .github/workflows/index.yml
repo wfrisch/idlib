@@ -41,9 +41,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
         release_name: Database Release ${{ github.run_number }}
-        draft: true
+        tag_name: db_release-${{ github.run_number }}
+        draft: false
         prerelease: false
 
     - name: Upload idlib.sqlite
