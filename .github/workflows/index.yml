@@ -40,7 +40,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.run_number }}
+        release_name: Database Release ${{ github.run_number }}
         draft: true
         prerelease: false
 
