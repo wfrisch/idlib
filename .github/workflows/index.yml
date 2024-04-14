@@ -1,0 +1,65 @@
+name: Index update
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Checkout submodules
+      run: git submodule update --init
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.11'
+
+    - name: Run the indexer
+      run: python3 index.py
+
+    - name: Compress database
+      run: zstd -k idlib.sqlite
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.run_number }}
+        draft: true
+        prerelease: false
+
+    - name: Upload idlib.sqlite
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./idlib.sqlite
+        asset_name: idlib.sqlite
+        asset_content_type: application/octet-stream
+
+    - name: Upload idlib.sqlite.zst
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./idlib.sqlite.zst
+        asset_name: idlib.sqlite.zst
+        asset_content_type: application/octet-stream
