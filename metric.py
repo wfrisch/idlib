@@ -52,6 +52,8 @@ repo_path = Path(args.repo_path)
 assert repo_path.is_dir()
 git = GitRepo(repo_path)
 
+print("This typically takes a long time...")
+
 re_cc_filename = re.compile(r'.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$', re.I)
 
 candidates = []
@@ -60,6 +62,9 @@ for path in repo_path.glob('**/*'):
     if re_cc_filename.match(path.name) and path.is_file():
         c = Candidate(git, str(relpath))
         candidates.append(c)
+    print(".", end='')
+    sys.stdout.flush()
+print("\n")
 
 candidates.sort(key=lambda c: c.score, reverse=True)
 print("Score  TimeCov  CommitCov  Path")
