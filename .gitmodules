@@ -88,9 +88,6 @@
 [submodule "libraries/uvwasi"]
 	path = libraries/uvwasi
 	url = https://github.com/nodejs/uvwasi
-[submodule "libraries/wlr-protocols"]
-	path = libraries/wlr-protocols
-	url = https://gitlab.freedesktop.org/wlroots/wlr-protocols.git/
 [submodule "libraries/sqlite"]
 	path = libraries/sqlite
 	url = https://github.com/sqlite/sqlite
