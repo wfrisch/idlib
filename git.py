@@ -89,4 +89,16 @@ class GitRepo:
                                             commit], text=True)
         return datetime.fromisoformat(time_str.strip())
 
+    def first_commit(self):
+        proc = subprocess.run(['git', '-C', self.repo, 'rev-list',
+                               '--max-parents=0', 'HEAD'], capture_output=True,
+                              text=True)
+        return proc.stdout.strip()
+
+    def count_commits(self):
+        proc = subprocess.run(['git', '-C', self.repo, 'rev-list', '--count',
+                               'HEAD'], capture_output=True, text=True)
+        return int(proc.stdout.strip())
+
+
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
