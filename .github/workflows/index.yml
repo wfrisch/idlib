@@ -28,7 +28,7 @@ jobs:
         python-version: '3.11'
 
     - name: Run the indexer
-      run: python3 index.py -v
+      run: python3 index.py
 
     - name: Compress database
       run: |
