@@ -6,7 +6,6 @@ Library = namedtuple('Library',
 
 libraries = [
     Library('boringssl', [
-            "include/openssl/ssl.h",
             "ssl/internal.h",
             "ssl/ssl_lib.cc",
             "ssl/handshake_client.cc",
@@ -14,7 +13,6 @@ libraries = [
             "ssl/handshake_server.cc",
             "ssl/test/bssl_shim.cc",
             "ssl/ssl_test.cc",
-            "include/openssl/x509.h",
             "ssl/ssl_x509.cc",
             "ssl/s3_lib.cc",
             "ssl/handshake.cc",
@@ -22,7 +20,6 @@ libraries = [
             "ssl/s3_both.cc",
             "ssl/ssl_cipher.cc",
             "ssl/ssl_cert.cc",
-            "include/openssl/base.h",
             "ssl/tls13_server.cc"]),
     Library('brotli',
             ['c/common/platform.h',
