@@ -100,5 +100,37 @@ class GitRepo:
                                'HEAD'], capture_output=True, text=True)
         return int(proc.stdout.strip())
 
+    def all_commits_with_metadata(self):
+        result = []
+        cmdline = ['git', '-C', self.repo, 'log', '--all', '--name-only',
+                   '--format=format:%(describe:tags) %H %ad', '--date=iso',
+                   '--diff-filter=AMR', '--ignore-submodules']
+        proc = subprocess.run(cmdline, capture_output=True, text=True)
+        # First line: {tag} {commit_hash} {commit_time}
+        # {tag} may be empty
+        """
+        v5.4.6-106-g65b07dd5 65b07dd53d7938a60112fc4473f5cad3473e3534 2024-03-11 14:05:06 -0300
+        lapi.c
+        lapi.h
+        ldebug.c
+        ldo.c
+        testes/api.lua
+
+        """
+        re_line0 = re.compile(
+                r'(?P<desc>[^ ]+)?\s?(?P<hash>[0-9a-f]{40,})\s+(?P<date>.*)')
+
+        chunks = proc.stdout.strip().split('\n\n')
+        for chunk in chunks:
+            lines = chunk.splitlines()
+            match = re_line0.match(lines[0])
+            if not match:
+                raise ValueError("unexpected line0: " + lines[0])
+            desc = match.group('desc') # can be None
+            commit_hash = match.group('hash')
+            commit_time = datetime.fromisoformat(match.group('date'))
+            paths = lines[1:]
+            result.append((commit_hash, commit_time, desc, paths))
+        return result
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
