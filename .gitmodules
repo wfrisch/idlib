@@ -127,3 +127,6 @@
 [submodule "libraries/curl"]
 	path = libraries/curl
 	url = https://github.com/curl/curl
+[submodule "libraries/nghttp2"]
+	path = libraries/nghttp2
+	url = https://github.com/nghttp2/nghttp2
