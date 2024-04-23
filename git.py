@@ -104,7 +104,7 @@ class GitRepo:
         result = []
         cmdline = ['git', '-C', self.repo, 'log', '--all', '--name-only',
                    '--format=format:%(describe:tags) %H %ad', '--date=iso',
-                   '--diff-filter=AMR', '--ignore-submodules']
+                   '--diff-filter=AMR', '--ignore-submodules', '-z']
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         # First line: {tag} {commit_hash} {commit_time}
         # {tag} may be empty
@@ -115,14 +115,16 @@ class GitRepo:
         ldebug.c
         ldo.c
         testes/api.lua
-
         """
         re_line0 = re.compile(
                 r'(?P<desc>[^ ]+)?\s?(?P<hash>[0-9a-f]{40,})\s+(?P<date>.*)')
 
-        chunks = proc.stdout.strip().split('\n\n')
+        chunks = proc.stdout.split('\0\0')
         for chunk in chunks:
-            lines = chunk.splitlines()
+            # if -z is combined with --name-only,
+            # the first line ends with \n instead of \0 like the rest
+            # this might be a bug in git
+            lines = re.split(r'[\0|\n]', chunk)
             match = re_line0.match(lines[0])
             if not match:
                 raise ValueError("unexpected line0: " + lines[0])
