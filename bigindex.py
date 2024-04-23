@@ -14,7 +14,7 @@ def libpath(lib):
     return Path("libraries") / lib.name
 
 # Normalization could save a bit of space but not that much. Only `time` and
-# `description` could be in a separate table. Not worth it, IMHO. It's much
+# `commit_desc` could be in a separate table. Not worth it, IMHO. It's much
 # easier to query a single table.
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS files (
     library     TEXT,  -- name of the library
     commit_hash TEXT,  -- git commit that introduced this version
     commit_time TEXT,  -- git commit timestamp (ISO 8601 format)
-    description TEXT,  -- git describe for this commit,
+    commit_desc TEXT,  -- git describe for this commit,
                        -- ... falls back to: 0^{date}.{commit_hash}
     path        TEXT,  -- file path at the time of the matched commit
     size        INTEGER
@@ -42,7 +42,7 @@ SourceInfo = collections.namedtuple(
                        'library',
                        'commit_hash',
                        'commit_time',
-                       'description',
+                       'commit_desc',
                        'path',
                        'size'])
 
@@ -106,7 +106,7 @@ for lib in libraries:
                                           library=lib.name,
                                           commit_hash=commit_hash,
                                           commit_time=commit_time,
-                                          description=desc,
+                                          commit_desc=desc,
                                           path=path,
                                           size=len(blob)))
     cur = con.cursor()
