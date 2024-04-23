@@ -18,13 +18,15 @@ def libpath(lib):
 # easier to query a single table.
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
-    sha256      TEXT PRIMARY KEY,
+    sha256      TEXT,
     library     TEXT,  -- name of the library
-    path        TEXT,  -- file path, at the time of the matched commit
     commit_hash TEXT,  -- git commit that introduced this version
     commit_time TEXT,  -- git commit timestamp (ISO 8601 format)
-    description TEXT   -- git describe for this commit,
+    description TEXT,  -- git describe for this commit,
                        -- ... falls back to: 0^{date}.{commit_hash}
+    path        TEXT,  -- file path at the time of the matched commit
+    size        INTEGER
+    -- mime_type   TEXT   -- $(file -b --mime-type < blob)
 );
 CREATE INDEX IF NOT EXISTS files_sha256_index ON files(sha256);
 
@@ -38,10 +40,11 @@ CREATE TABLE IF NOT EXISTS libraries (  -- optional
 SourceInfo = collections.namedtuple(
         'SourceInfo', ['sha256',
                        'library',
-                       'path',
                        'commit_hash',
                        'commit_time',
-                       'description'])
+                       'description',
+                       'path',
+                       'size'])
 
 
 parser = argparse.ArgumentParser()
@@ -90,6 +93,9 @@ for lib in libraries:
             desc = "0^" + commit_time.strftime("%Y%m%d.") + commit_hash
         for path in paths:
             blob = git.file_bytes_at_commit(commit_hash, path)
+            # if len(blob) == 0:
+            #     print("skipped empty file:", commit_hash, path)
+            #     continue
             m = hashlib.sha256()
             m.update(blob)
             sha256 = m.hexdigest()
@@ -98,12 +104,18 @@ for lib in libraries:
                   end='\r')
             sourceinfos.append(SourceInfo(sha256=sha256,
                                           library=lib.name,
-                                          path=path,
                                           commit_hash=commit_hash,
                                           commit_time=commit_time,
-                                          description=desc))
+                                          description=desc,
+                                          path=path,
+                                          size=len(blob)))
+    cur = con.cursor()
+    cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
     for info in sourceinfos:
-        cur.execute('''REPLACE INTO files VALUES (?,?,?,?,?,?)''', info)
+        try:
+            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
+        except sqlite3.IntegrityError as e:
+            print("IntegrityError:", e, info)
     con.commit()
     print()
     sys.stdout.flush()
