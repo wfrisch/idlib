@@ -56,6 +56,7 @@ Suggested config:
 
 - TimeCov [0..1] describes the lifespan of a file in the repo
 - CommitCov [0..1] describes how many commits affected a file
+  - TODO: count commits in the lifetime of the file instead of the repo
 - Score [0..1] = TimeCov * CommitCov
 
 This is a rather simple metric and developers should review and adjust the
