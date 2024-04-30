@@ -70,8 +70,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", help="database path. Default: ./idlib.sqlite",
                     dest="db", default='idlib.sqlite')
 parser.add_argument("-l", "--library", help="index only a specific library")
-parser.add_argument("-p", "--prune-only", action="store_true",
-                    help="don't index, only prune database")
+parser.add_argument("--prune-only", action="store_true",
+                    help="only prune the database")
+parser.add_argument("--no-prune", action="store_true",
+                    help="don't prune the database")
 parser.add_argument("-m", "--mode",
                     choices=["sparse", "full"], default="sparse",
                     help="index mode (default: sparse)")
@@ -253,7 +255,8 @@ if not args.prune_only:
         index_sparse()
     elif args.mode == 'full':
         index_full()
-print()
-prune()
+if not args.no_prune:
+    print()
+    prune()
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
