@@ -11,6 +11,20 @@ from git import GitRepo
 import config
 
 
+# try:
+#     import magic
+#     def mime_type_from_blob(blob):
+#         return magic.from_buffer(blob, mime=True)
+# except ModuleNotFoundError:
+#     print("python-magic not found, falling back /usr/bin/file",
+#           file=sys.stderr)
+#     import subprocess
+#     def mime_type_from_blob(blob):
+#         proc = subprocess.run(['file', '-b', '--mime-type', '-'],
+#             capture_output=True, text=True, input=blob, check=True)
+#         return proc.stdout.strip()
+
+
 def libpath(lib):
     return Path("libraries") / lib.name
 
@@ -48,6 +62,7 @@ SourceInfo = collections.namedtuple(
                        'commit_desc',
                        'path',
                        'size',
+                       # 'mime_type'
                        ])
 
 
@@ -129,13 +144,16 @@ def index_full():
                 cnt_hashes += 1
                 print(f"{cnt_commits}/{len(commits)} commits  {cnt_hashes} hashes",
                       end='\r')
+                # mime_type = mime_type_from_blob(blob)
                 sourceinfos.append(SourceInfo(sha256=sha256,
                                               library=lib.name,
                                               commit_hash=commit_hash,
                                               commit_time=commit_time,
                                               commit_desc=commit_desc,
                                               path=path,
-                                              size=len(blob)))
+                                              size=len(blob),
+                                              # mime_type=mime_type
+                                              ))
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
         for info in sourceinfos:
