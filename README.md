@@ -19,52 +19,91 @@ zstd 0^20210512.c730b8c5a38b9e93efc0c3639e26f18f14b82f95
 ```
 
 ## Implementation
-idlib is designed with the following goals in mind:
-* manageable index size
-* zero false positives at the cost of false negatives
-
-This is accomplished with a simple lookup table that associates a file's
-SHA-256 hash with metadata from the respective library's git repository:
+At its core, idlib relies on a lookup table that associates a file's SHA-256
+hash with metadata from the respective library's git repository:
 
 ```
 CREATE TABLE IF NOT EXISTS files (
-    sha256      TEXT PRIMARY KEY,
+    sha256      TEXT,
     library     TEXT,  -- name of the library
-    path        TEXT,  -- file path, at the time of the matched commit
     commit_hash TEXT,  -- git commit that introduced this version
     commit_time TEXT,  -- git commit timestamp (ISO 8601 format)
-    description TEXT   -- git describe for this commit,
+    commit_desc TEXT,  -- git describe for this commit,
                        -- ... falls back to: 0^{date}.{commit_hash}
+    path        TEXT,  -- file path at the time of the matched commit
+    size        INTEGER
 );
 ```
 
-The database is generated daily by a GitHub workflow.
-
 ### Indexer (`index.py`)
-The [indexer](index.py) iterates over a list of [configured
-libraries](config.py), and performs roughly the following steps:
-
-* For each configured file, follow its `git log`:
-  - For each (commit:path) pair:
-    - store SHA-256(commit:path)
-    - store metadata, e.g. the commit hash, timestamp and `git describe`
-
-That's all.
+The indexer generates this database from a list of
+[configured libraries](config.py).
 
 ```
-usage: index.py [-h] [-d DB] [-l LIBRARY] [-v]
+$ ./index.py -h
+usage: index.py [-h] [-d DB] [-l LIBRARY] [-p] [-m {sparse,full}] [-v]
 
 options:
   -h, --help            show this help message and exit
   -d DB                 database path. Default: ./idlib.sqlite
   -l LIBRARY, --library LIBRARY
                         index only a specific library
+  -p, --prune-only      don't index, only prune database
+  -m {sparse,full}, --mode {sparse,full}
+                        index mode (default: sparse)
   -v, --verbose
 ```
 
-### Client (`identify.py`)
-The [client](identify.py) enumerates all C/C++ files in a directory, hashes
-them and looks up the respective metadata in the sqlite database.
+It has two modes:
+
+#### Sparse mode
+In sparse mode (default), only a hand-picked set of files is considered for
+indexing. The idea is to improve the signal/noise ratio by choosing files that
+a) are unique to the library, b) are unlikely to be omitted in a copy.
+
+For each configured file, run `git log --follow`
+  - For each commit:
+    - store metadata (commit hash, time, `git describe`)
+    - For each file modified by the commit:
+      - store SHA-256(commit:path)
+
+Advantages:
+- Compact database
+- Low false positive rate
+
+Disadvantages:
+- Less accurate version identification
+
+#### Full mode
+In full mode, all files in all commits are indexed.
+
+Advantages:
+- More accurate version identification
+
+Disadvantages:
+- Large database
+- False positives likely, unless the client filters the results, for example by
+  only considering .c/.cpp matches
+
+#### Pruning
+In both modes the indexer prunes the database after indexing:
+- Remove empty files
+- Remove embedded copies of other libraries, for example libpng embeds zlib.
+  - Remove all hashes in libpng that also exist zlib.
+- Remove remaining inter-library duplicates, usually stuff like
+  - license files
+  - standard .gitignore files
+  - build system artifacts
+  - etc
+
+The result is a database where no hash ever points to more than one library.
+Duplicates within a library are kept, though.
+
+If the sparse mode is configured properly, prune() shouldn't find anything.
+
+### Client
+The client (`identify.py`) hashes all C/C++ files in a directory and looks up
+the respective database entries.
 
 ```
 usage: identify.py [-h] [-d DB] [-s] directory
@@ -117,3 +156,6 @@ libuv v1.44.0-5-gbae2992c
 zlib v1.2.12-30-ga9e14e8
 zstd 0^20210512.c730b8c5a38b9e93efc0c3639e26f18f14b82f95
 ```
+
+## Adding new libraries
+TODO
