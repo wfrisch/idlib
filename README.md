@@ -5,7 +5,7 @@ idlib finds embedded copies of C/C++ libraries in open-source packages.
 ## Usage example
 ```
 # Download the latest database
-wget -O- https://github.com/wfrisch/idlib/releases/latest/download/idlib.sqlite.xz |xzcat > idlib.sqlite
+wget -O- https://github.com/wfrisch/idlib/releases/latest/download/idlib.sqlite.zst |zstdcat > idlib.sqlite
 
 # Scan a package
 ./identify.py -s cmake-3.29.0/
