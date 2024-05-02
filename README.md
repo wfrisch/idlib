@@ -56,10 +56,13 @@ options:
 
 It has two modes:
 
+* sparse mode (default)
+* full mode
+
 #### Sparse mode
-In sparse mode (default), only a hand-picked set of files is considered for
-indexing. The idea is to improve the signal/noise ratio by choosing files that
-a) are unique to the library, b) are unlikely to be omitted in a copy.
+In sparse mode, only a hand-picked set of files is considered for indexing. The
+idea is to improve the signal/noise ratio by choosing files that a) are unique
+to the library, b) are unlikely to be omitted in a copy.
 
 For each configured file, run `git log --follow`
   - For each commit:
