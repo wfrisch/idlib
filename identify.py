@@ -46,29 +46,30 @@ def identify(path):
     return rows
 
 
-lib_findings = {}  # library name -> database rows
+Finding = collections.namedtuple('Finding', ['rel_path', 'row'])
+lib_findings = {}
 
 re_cc_filename = re.compile(r'.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$', re.I)
 for path in directory.glob('**/*'):
-    relpath = path.relative_to(directory)
+    rel_path = path.relative_to(directory)
     if re_cc_filename.match(path.name) and path.is_file():
         rows = identify(path)
-        if not args.summarize:
-            for row in rows:
-                print(relpath, row.library, row.commit_desc)
-        else:
-            for row in rows:
-                if row.library not in lib_findings:
-                    lib_findings[row.library] = []
-                lib_findings[row.library].append(row)
-        sys.stdout.flush()
+        for row in rows:
+            if row.library not in lib_findings:
+                lib_findings[row.library] = []
+            f = Finding(rel_path, row)
+            lib_findings[row.library].append(f)
 
 if args.summarize:
     # For each library, sort all matches by the commit time and print only the
     # latest file description.
-    for lib_name, rows in lib_findings.items():
-        latest = sorted(rows, key=lambda row: row.commit_time)[-1]
-        print(lib_name, latest.commit_desc)
+    for lib_name, findings in sorted(lib_findings.items()):
+        latest = sorted(findings, key=lambda f: f.row.commit_time)[-1]
+        print(lib_name, latest.row.commit_desc)
+else:
+    for lib_name, findings in sorted(lib_findings.items()):
+        for f in findings:
+            print(f.row.library, f.row.commit_desc, f.rel_path)
         sys.stdout.flush()
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
