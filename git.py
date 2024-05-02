@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
+import pygit2
 import subprocess
 import re
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 
 def is_git_repository(directory):
@@ -28,6 +29,7 @@ class GitRepo:
         self.repo_path = repo_path
         self.gitbin = shutil.which("git")
         self.gitcmd = [self.gitbin, '-C', self.repo_path]
+        self.repo = pygit2.Repository(repo_path)
 
     def is_modified(self):
         output = subprocess.check_output(self.gitcmd + ['status'])
@@ -58,38 +60,46 @@ class GitRepo:
 
     def file_bytes_at_commit(self, commit, path):
         """File contents for commit:path as bytes."""
-        return subprocess.check_output(self.gitcmd + ['show',
-                                        f'{commit}:{path}'])
+        # return subprocess.check_output(self.gitcmd + ['show',
+        #                                f'{commit}:{path}'])
+        commitobj = self.repo.get(commit)
+        entry = commitobj.tree[path]
+        blob = self.repo[entry.id].data
+        return blob
 
     def file_text_at_commit(self, commit, path):
         """File contents for commit:path as UTF-8."""
-        cmdline = self.gitcmd + ['show', f'{commit}:{path}']
-        proc = subprocess.run(cmdline, capture_output=True)
-        if proc.returncode != 0:
-            raise GitException("`git show` failed with exit code "
-                               f"{proc.returncode}. cmdline: {cmdline}")
-        return proc.stdout.decode('UTF-8', errors='ignore')  # deliberate
+        return self.file_bytes_at_commit.decode('UTF-8', errors='ignore')
 
     def describe(self, commit):
-        cmdline = self.gitcmd + ['describe', '--candidates=100000',
-                  commit]
-        proc = subprocess.run(cmdline, capture_output=True, text=True)
-        if re.match(r"fatal: No( annotated)? tags can describe.*",
-                    proc.stderr):
-            return None
-        if re.match(r"fatal: No names found, cannot describe anything.*",
-                    proc.stderr):
-            return None
-        if proc.returncode != 0:
-            raise GitException("`git describe` failed with exit code "
-                               f"{proc.returncode}. cmdline: {cmdline}")
-        return proc.stdout.strip()
+        # cmdline = self.gitcmd + ['describe', '--candidates=100000',
+        #           commit]
+        # proc = subprocess.run(cmdline, capture_output=True, text=True)
+        # if re.match(r"fatal: No( annotated)? tags can describe.*",
+        #             proc.stderr):
+        #     return None
+        # if re.match(r"fatal: No names found, cannot describe anything.*",
+        #             proc.stderr):
+        #     return None
+        # if proc.returncode != 0:
+        #     raise GitException("`git describe` failed with exit code "
+        #                        f"{proc.returncode}. cmdline: {cmdline}")
+        # return proc.stdout.strip()
+        try:
+            return self.repo.describe(commit,
+                                      describe_strategy=pygit2.enums.DescribeStrategy.TAGS)
+        except KeyError as e:
+            if "no tags can describe" in str(e):
+                return None
 
     def datetime(self, commit):
-        time_str = subprocess.check_output(self.gitcmd + ['show',
-                                           '--no-patch', '--format=%ci',
-                                           commit], text=True)
-        return datetime.fromisoformat(time_str.strip())
+        # time_str = subprocess.check_output(self.gitcmd + ['show',
+        #                                    '--no-patch', '--format=%ci',
+        #                                    commit], text=True)
+        # return datetime.fromisoformat(time_str.strip())
+        c = self.repo.get(commit)
+        tz = timezone(timedelta(minutes=c.commit_time_offset))
+        return datetime.fromtimestamp(c.commit_time).astimezone(tz)
 
     def first_commit(self):
         proc = subprocess.run(self.gitcmd + ['rev-list',
@@ -143,7 +153,7 @@ class GitRepo:
             commit_desc = match.group('desc') # can be None
             commit_hash = match.group('hash')
             commit_time = datetime.fromisoformat(match.group('date'))
-            paths = lines[1:]
+            paths = list(filter(lambda line: len(line) > 0, lines[1:]))
             result.append((commit_hash, commit_time, paths, commit_desc))
         return result
 
