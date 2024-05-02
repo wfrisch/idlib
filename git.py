@@ -92,7 +92,13 @@ class GitRepo:
         proc = subprocess.run(['git', '-C', self.repo, 'rev-list',
                                '--max-parents=0', 'HEAD'], capture_output=True,
                               text=True)
-        return proc.stdout.strip()
+        root_commits = proc.stdout.splitlines()
+        if len(root_commits) > 1:
+            # multiple root commits are uncommon,
+            # but they do occur, for example in 
+            # https://github.com/google/googletest
+            root_commits.sort(key=lambda c: self.datetime(c))
+        return root_commits[0]
 
     def count_commits(self):
         proc = subprocess.run(['git', '-C', self.repo, 'rev-list', '--count',
