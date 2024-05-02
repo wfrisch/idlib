@@ -31,7 +31,7 @@ jobs:
       run: python3 index.py -d idlib.sqlite
 
     - name: Index (full)
-      run: python3 index.py -d idlib-full.sqlite
+      run: python3 index.py -m full -d idlib-full.sqlite
 
     - name: Compress databases
       run: |
