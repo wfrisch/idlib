@@ -130,3 +130,12 @@
 [submodule "libraries/nghttp2"]
 	path = libraries/nghttp2
 	url = https://github.com/nghttp2/nghttp2
+[submodule "libraries/googletest"]
+	path = libraries/googletest
+	url = https://github.com/google/googletest
+[submodule "libraries/Little-CMS"]
+	path = libraries/Little-CMS
+	url = https://github.com/mm2/Little-CMS
+[submodule "libraries/libtiff"]
+	path = libraries/libtiff
+	url = https://gitlab.com/libtiff/libtiff
