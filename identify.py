@@ -55,7 +55,7 @@ for path in directory.glob('**/*'):
         rows = identify(path)
         if not args.summarize:
             for row in rows:
-                print(relpath, row.library, row.description)
+                print(relpath, row.library, row.commit_desc)
         else:
             for row in rows:
                 if row.library not in lib_findings:
@@ -68,7 +68,7 @@ if args.summarize:
     # latest file description.
     for lib_name, rows in lib_findings.items():
         latest = sorted(rows, key=lambda row: row.commit_time)[-1]
-        print(lib_name, latest.description)
+        print(lib_name, latest.commit_desc)
         sys.stdout.flush()
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
