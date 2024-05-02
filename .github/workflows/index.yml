@@ -27,13 +27,16 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Run the indexer
-      run: python3 index.py
+    - name: Index (sparse)
+      run: python3 index.py -d idlib.sqlite
 
-    - name: Compress database
+    - name: Index (full)
+      run: python3 index.py -d idlib-full.sqlite
+
+    - name: Compress databases
       run: |
         zstd -k idlib.sqlite
-        xz -k idlib.sqlite
+        zstd -k idlib-full.sqlite
 
     - name: Create Release
       id: create_release
@@ -66,12 +69,12 @@ jobs:
         asset_name: idlib.sqlite.zst
         asset_content_type: application/octet-stream
 
-    - name: Upload idlib.sqlite.xz
+    - name: Upload idlib-full.sqlite.zst
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./idlib.sqlite.xz
-        asset_name: idlib.sqlite.xz
+        asset_path: ./idlib-full.sqlite.zst
+        asset_name: idlib-full.sqlite.zst
         asset_content_type: application/octet-stream
