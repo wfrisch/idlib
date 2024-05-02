@@ -320,7 +320,7 @@ embedded = {
     "freetype":   ["zlib"],
     "libpng":     ["zlib"],
     "minizip-ng": ["xz"],
-    "openjpeg":   ["astyle", "libpng", "libtiff", "Little-CMS", "zlib"],
+    "openjpeg":   ["libpng", "libtiff", "Little-CMS", "zlib"],
     "zlib":       ["minizip-ng"],
     "zstd":       ["xxHash", "zlib"],
 }
