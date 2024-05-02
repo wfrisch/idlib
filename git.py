@@ -22,47 +22,48 @@ class GitException(Exception):
 
 
 class GitRepo:
-    def __init__(self, repo):
-        if not is_git_repository(repo):
-            raise ValueError(f"not a git repository: {repo}")
-        self.repo = repo
+    def __init__(self, repo_path):
+        if not is_git_repository(repo_path):
+            raise ValueError(f"not a git repository: {repo_path}")
+        self.repo_path = repo_path
         self.gitbin = shutil.which("git")
+        self.gitcmd = [self.gitbin, '-C', self.repo_path]
 
     def is_modified(self):
-        output = subprocess.check_output([self.gitbin, '-C', self.repo, 'status'])
+        output = subprocess.check_output(self.gitcmd + ['status'])
         return "nothing to commit" not in output.decode()
 
     def ls_tracked_files(self):
-        return subprocess.check_output([self.gitbin, '-C', self.repo, 'ls-files',
-                                        '--cached']).decode().splitlines()
+        return subprocess.check_output(self.gitcmd + ['ls-files',
+                                       '--cached']).decode().splitlines()
 
     def current_hash(self):
-        return subprocess.check_output([self.gitbin, '-C', self.repo, 'rev-parse',
-                                        'HEAD']).decode().strip()
+        return subprocess.check_output(self.gitcmd + ['rev-parse',
+                                       'HEAD']).decode().strip()
 
     def commits_affecting_file(self, path):
         """List of commits that changed a file"""
-        out = subprocess.check_output([self.gitbin, '-C', self.repo, 'log',
-                                       '--pretty=format:%H', path])
+        out = subprocess.check_output(self.gitcmd + ['log',
+                                      '--pretty=format:%H', path])
         return out.decode('UTF-8').splitlines()
 
     def commits_affecting_file_follow(self, path):
         """List of commits for a file, including renames.
         Returns [(commit,path), (commit,path), ...]"""
-        cmdline = [self.gitbin, '-C', self.repo, 'log', '--pretty=format:%H',
-                   '--name-only', '--follow', '--diff-filter=AMR', '--', path]
+        cmdline = self.gitcmd + ['log', '--pretty=format:%H', '--name-only',
+                  '--follow', '--diff-filter=AMR', '--', path]
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         chunks = proc.stdout.strip().split('\n\n')
         return [tuple(chunk.split('\n')) for chunk in chunks]
 
     def file_bytes_at_commit(self, commit, path):
         """File contents for commit:path as bytes."""
-        return subprocess.check_output([self.gitbin, '-C', self.repo, 'show',
+        return subprocess.check_output(self.gitcmd + ['show',
                                         f'{commit}:{path}'])
 
     def file_text_at_commit(self, commit, path):
         """File contents for commit:path as UTF-8."""
-        cmdline = [self.gitbin, '-C', self.repo, 'show', f'{commit}:{path}']
+        cmdline = self.gitcmd + ['show', f'{commit}:{path}']
         proc = subprocess.run(cmdline, capture_output=True)
         if proc.returncode != 0:
             raise GitException("`git show` failed with exit code "
@@ -70,8 +71,8 @@ class GitRepo:
         return proc.stdout.decode('UTF-8', errors='ignore')  # deliberate
 
     def describe(self, commit):
-        cmdline = [self.gitbin, '-C', self.repo, 'describe', '--candidates=100000',
-                   commit]
+        cmdline = self.gitcmd + ['describe', '--candidates=100000',
+                  commit]
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         if re.match(r"fatal: No( annotated)? tags can describe.*",
                     proc.stderr):
@@ -85,14 +86,14 @@ class GitRepo:
         return proc.stdout.strip()
 
     def datetime(self, commit):
-        time_str = subprocess.check_output([self.gitbin, '-C', self.repo, 'show',
-                                            '--no-patch', '--format=%ci',
-                                            commit], text=True)
+        time_str = subprocess.check_output(self.gitcmd + ['show',
+                                           '--no-patch', '--format=%ci',
+                                           commit], text=True)
         return datetime.fromisoformat(time_str.strip())
 
     def first_commit(self):
-        proc = subprocess.run([self.gitbin, '-C', self.repo, 'rev-list',
-                               '--max-parents=0', 'HEAD'], capture_output=True,
+        proc = subprocess.run(self.gitcmd + ['rev-list',
+                              '--max-parents=0', 'HEAD'], capture_output=True,
                               text=True)
         root_commits = proc.stdout.splitlines()
         if len(root_commits) > 1:
@@ -103,15 +104,15 @@ class GitRepo:
         return root_commits[0]
 
     def count_commits(self):
-        proc = subprocess.run([self.gitbin, '-C', self.repo, 'rev-list', '--count',
-                               'HEAD'], capture_output=True, text=True)
+        proc = subprocess.run(self.gitcmd + ['rev-list', '--count',
+                              'HEAD'], capture_output=True, text=True)
         return int(proc.stdout.strip())
 
     def all_commits_with_metadata(self, describe=False):
         result = []
-        cmdline = [self.gitbin, '-C', self.repo, 'log', '--all', '--name-only',
-                   '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
-                   '-z']
+        cmdline = self.gitcmd + ['log', '--all', '--name-only',
+                  '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
+                  '-z']
         if describe:
             cmdline += ['--format=format:%(describe:tags) %H %ad']
         else:
