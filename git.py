@@ -76,7 +76,6 @@ class GitRepo:
             return None
         if re.match(r"fatal: No names found, cannot describe anything.*",
                     proc.stderr):
-            # This happens when a repo doesn't contain any tags at all.
             return None
         if proc.returncode != 0:
             raise GitException("`git describe` failed with exit code "
@@ -100,11 +99,15 @@ class GitRepo:
                                'HEAD'], capture_output=True, text=True)
         return int(proc.stdout.strip())
 
-    def all_commits_with_metadata(self):
+    def all_commits_with_metadata(self, describe=False):
         result = []
         cmdline = ['git', '-C', self.repo, 'log', '--all', '--name-only',
-                   '--format=format:%(describe:tags) %H %ad', '--date=iso',
-                   '--diff-filter=AMR', '--ignore-submodules', '-z']
+                   '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
+                   '-z']
+        if describe:
+            cmdline += ['--format=format:%(describe:tags) %H %ad']
+        else:
+            cmdline += ['--format=format:%H %ad']
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         # First line: {tag} {commit_hash} {commit_time}
         # {tag} may be empty
@@ -128,11 +131,11 @@ class GitRepo:
             match = re_line0.match(lines[0])
             if not match:
                 raise ValueError("unexpected line0: " + lines[0])
-            desc = match.group('desc') # can be None
+            commit_desc = match.group('desc') # can be None
             commit_hash = match.group('hash')
             commit_time = datetime.fromisoformat(match.group('date'))
             paths = lines[1:]
-            result.append((commit_hash, commit_time, desc, paths))
+            result.append((commit_hash, commit_time, paths, commit_desc))
         return result
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
