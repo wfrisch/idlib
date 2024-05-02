@@ -2,8 +2,9 @@
 from pathlib import Path
 import argparse
 import collections
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
-import multiprocessing
 import sqlite3
 import sys
 
@@ -105,18 +106,45 @@ con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
 
 
-# Parallel `git describe`
-def _describe_map(tup):
-    git, commit = tup
-    return (commit, git.describe(commit))
+def get_sourceinfos(git, lib_name, commit):
+    result = []
+    commit_hash, commit_time, paths, _ = commit
+    commit_desc = git.describe(commit_hash)
+    if not commit_desc:
+        commit_desc = "0^" + commit_time.strftime("%Y%m%d.") + commit_hash
+    for path in paths:
+        blob = git.file_bytes_at_commit(commit_hash, path)
+        file_size = len(blob)
+        m = hashlib.sha256()
+        m.update(blob)
+        sha256 = m.hexdigest()
+        # mime_type = mime_type_from_blob(blob)
+        result.append(SourceInfo(sha256=sha256,
+                                 library=lib_name,
+                                 commit_hash=commit_hash,
+                                 commit_time=commit_time,
+                                 commit_desc=commit_desc,
+                                 path=path,
+                                 size=file_size,
+                                 # mime_type=mime_type
+                                 ))
+    # print(f"{cnt_commits}/{len(commits)} commits  {cnt_hashes} hashes",
+    #       end='\r')
+    return result
 
+def get_all_sourceinfos(git, lib_name, commit_tuples):
+    result = []
+    for commit in commit_tuples:
+       result += get_sourceinfos(git, lib_name, commit)
+    return result
 
-def describe_many(git, commits):
-    with multiprocessing.Pool() as pool:
-        inp = [(git, commit) for commit in commits]
-        descriptions = pool.map(_describe_map, inp)
-        return dict(descriptions)
-
+def get_all_sourceinfos_parallel(git, lib_name, commit_tuples):
+    result = []
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(get_sourceinfos, git, lib_name, commit) for commit in commit_tuples]
+        for future in concurrent.futures.as_completed(futures):
+            result += future.result()
+    return result
 
 def index_full():
     for lib in libraries:
@@ -125,40 +153,12 @@ def index_full():
         git = GitRepo(libpath(lib))
         print("- fetching list of all commits")
         commits = git.all_commits_with_metadata()
-        print(f"- fetching descriptions for {len(commits)} commits")
-        commit_hashes = list(map(lambda c: c[0], commits))
-        descriptions = describe_many(git, commit_hashes)
-
-        cnt_commits = 0
-        cnt_hashes = 0
-        sourceinfos = []
+        # commit_hashes = list(map(lambda c: c[0], commits))
+        num_files = 0
         for commit in commits:
-            cnt_commits += 1
-            commit_hash, commit_time, paths, _ = commit
-            commit_desc = descriptions[commit_hash]
-            if not commit_desc:
-                commit_desc = "0^" + commit_time.strftime("%Y%m%d.") + commit_hash
-            for path in paths:
-                blob = git.file_bytes_at_commit(commit_hash, path)
-                # if len(blob) == 0:
-                #     print("skipped empty file:", commit_hash, path)
-                #     continue
-                m = hashlib.sha256()
-                m.update(blob)
-                sha256 = m.hexdigest()
-                cnt_hashes += 1
-                print(f"{cnt_commits}/{len(commits)} commits  {cnt_hashes} hashes",
-                      end='\r')
-                # mime_type = mime_type_from_blob(blob)
-                sourceinfos.append(SourceInfo(sha256=sha256,
-                                              library=lib.name,
-                                              commit_hash=commit_hash,
-                                              commit_time=commit_time,
-                                              commit_desc=commit_desc,
-                                              path=path,
-                                              size=len(blob),
-                                              # mime_type=mime_type
-                                              ))
+            num_files += len(commit[2])
+        print(f"- hashing {num_files} files in {len(commits)} commits")
+        sourceinfos = get_all_sourceinfos_parallel(git, lib.name, commits)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
         for info in sourceinfos:
