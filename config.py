@@ -231,4 +231,14 @@ libraries = [
              'lib/decompress/zstd_decompress.c']),
 ]
 
+# Some libraries embed code themselves:
+embedded = {
+    "freetype":   ["zlib"],
+    "libpng":     ["zlib"],
+    "minizip-ng": ["xz"],
+    "openjpeg":   ["libpng", "zlib"],
+    "zlib":       ["minizip-ng"],
+    "zstd":       ["xxHash", "zlib"],
+}
+
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
