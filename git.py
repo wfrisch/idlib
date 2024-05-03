@@ -97,6 +97,8 @@ class GitRepo:
         except KeyError as e:
             if "no tags can describe" in str(e):
                 return None
+            else:
+                raise e
 
     def datetime(self, commit):
         # time_str = subprocess.check_output(self.gitcmd + ['show',
