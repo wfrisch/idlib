@@ -218,3 +218,6 @@
 	path = libraries/libusb
 	url = https://github.com/libusb/libusb
 	ignore = dirty
+[submodule "libraries/libzmq"]
+	path = libraries/libzmq
+	url = https://github.com/zeromq/libzmq
