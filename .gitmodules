@@ -1,141 +1,220 @@
 [submodule "sources/zlib.git"]
 	path = libraries/zlib
 	url = https://github.com/madler/zlib
+	ignore = dirty
 [submodule "sources/openjpeg.git"]
 	path = libraries/openjpeg
 	url = https://github.com/uclouvain/openjpeg
+	ignore = dirty
 [submodule "libraries/tinyxml2.git"]
 	path = libraries/tinyxml2
 	url = https://github.com/leethomason/tinyxml2
+	ignore = dirty
 [submodule "libraries/libpng.git"]
 	path = libraries/libpng
 	url = https://github.com/pnggroup/libpng
+	ignore = dirty
 [submodule "libraries/libjpeg-turbo.git"]
 	path = libraries/libjpeg-turbo
 	url = https://github.com/libjpeg-turbo/libjpeg-turbo
+	ignore = dirty
 [submodule "libraries/zstd.git"]
 	path = libraries/zstd
 	url = https://github.com/facebook/zstd
+	ignore = dirty
 [submodule "libraries/curl.git"]
 	path = libraries/curl
 	url = https://github.com/curl/curl
+	ignore = dirty
 [submodule "libraries/libuv.git"]
 	path = libraries/libuv
 	url = https://github.com/libuv/libuv
+	ignore = dirty
 [submodule "libraries/xz.git"]
 	path = libraries/xz
 	url = https://github.com/tukaani-project/xz
+	ignore = dirty
 [submodule "libraries/pcre2.git"]
 	path = libraries/pcre2
 	url = https://github.com/PCRE2Project/pcre2/
+	ignore = dirty
 [submodule "libraries/libnsgif.git"]
 	path = libraries/libnsgif
 	url = git://git.netsurf-browser.org/libnsgif.git
+	ignore = dirty
 [submodule "libraries/fatfs"]
 	path = libraries/fatfs
 	url = https://github.com/abbrev/fatfs
+	ignore = dirty
 [submodule "libraries/minizip-ng"]
 	path = libraries/minizip-ng
 	url = https://github.com/zlib-ng/minizip-ng
+	ignore = dirty
 [submodule "libraries/xxHash"]
 	path = libraries/xxHash
 	url = https://github.com/Cyan4973/xxHash
+	ignore = dirty
 [submodule "libraries/lua"]
 	path = libraries/lua
 	url = https://github.com/lua/lua
+	ignore = dirty
 [submodule "libraries/boringssl"]
 	path = libraries/boringssl
 	url = https://boringssl.googlesource.com/boringssl
+	ignore = dirty
 [submodule "libraries/ffmpeg"]
 	path = libraries/ffmpeg
 	url = https://git.ffmpeg.org/ffmpeg.git
+	ignore = dirty
 [submodule "libraries/flac"]
 	path = libraries/flac
 	url = https://github.com/xiph/flac
+	ignore = dirty
 [submodule "libraries/fmt"]
 	path = libraries/fmt
 	url = https://github.com/fmtlib/fmt
+	ignore = dirty
 [submodule "libraries/freetype"]
 	path = libraries/freetype
 	url = https://github.com/freetype/freetype
+	ignore = dirty
 [submodule "libraries/giflib"]
 	path = libraries/giflib
 	url = https://git.code.sf.net/p/giflib/code
+	ignore = dirty
 [submodule "libraries/harfbuzz"]
 	path = libraries/harfbuzz
 	url = https://github.com/harfbuzz/harfbuzz
+	ignore = dirty
 [submodule "libraries/hunspell"]
 	path = libraries/hunspell
 	url = https://github.com/hunspell/hunspell
+	ignore = dirty
 [submodule "libraries/libb2"]
 	path = libraries/libb2
 	url = https://github.com/BLAKE2/libb2
+	ignore = dirty
 [submodule "libraries/brotli"]
 	path = libraries/brotli
 	url = https://github.com/google/brotli
+	ignore = dirty
 [submodule "libraries/leveldb"]
 	path = libraries/leveldb
 	url = https://github.com/google/leveldb
+	ignore = dirty
 [submodule "libraries/libbpf"]
 	path = libraries/libbpf
 	url = https://github.com/libbpf/libbpf
+	ignore = dirty
 [submodule "libraries/protobuf"]
 	path = libraries/protobuf
 	url = https://github.com/protocolbuffers/protobuf/
+	ignore = dirty
 [submodule "libraries/uthash"]
 	path = libraries/uthash
 	url = https://github.com/troydhanson/uthash
+	ignore = dirty
 [submodule "libraries/uvwasi"]
 	path = libraries/uvwasi
 	url = https://github.com/nodejs/uvwasi
+	ignore = dirty
 [submodule "libraries/sqlite"]
 	path = libraries/sqlite
 	url = https://github.com/sqlite/sqlite
+	ignore = dirty
 [submodule "libraries/xz-embedded"]
 	path = libraries/xz-embedded
 	url = https://github.com/tukaani-project/xz-embedded
+	ignore = dirty
 [submodule "libraries/zlib"]
 	path = libraries/zlib
 	url = https://github.com/madler/zlib
+	ignore = dirty
 [submodule "libraries/openjpeg"]
 	path = libraries/openjpeg
 	url = https://github.com/uclouvain/openjpeg
+	ignore = dirty
 [submodule "libraries/tinyxml2"]
 	path = libraries/tinyxml2
 	url = https://github.com/leethomason/tinyxml2
+	ignore = dirty
 [submodule "libraries/libpng"]
 	path = libraries/libpng
 	url = https://github.com/pnggroup/libpng
+	ignore = dirty
 [submodule "libraries/libjpeg-turbo"]
 	path = libraries/libjpeg-turbo
 	url = https://github.com/libjpeg-turbo/libjpeg-turbo
+	ignore = dirty
 [submodule "libraries/zstd"]
 	path = libraries/zstd
 	url = https://github.com/facebook/zstd
+	ignore = dirty
 [submodule "libraries/libuv"]
 	path = libraries/libuv
 	url = https://github.com/libuv/libuv
+	ignore = dirty
 [submodule "libraries/xz"]
 	path = libraries/xz
 	url = https://github.com/tukaani-project/xz
+	ignore = dirty
 [submodule "libraries/pcre2"]
 	path = libraries/pcre2
 	url = https://github.com/PCRE2Project/pcre2/
+	ignore = dirty
 [submodule "libraries/libnsgif"]
 	path = libraries/libnsgif
 	url = git://git.netsurf-browser.org/libnsgif.git
+	ignore = dirty
 [submodule "libraries/curl"]
 	path = libraries/curl
 	url = https://github.com/curl/curl
+	ignore = dirty
 [submodule "libraries/nghttp2"]
 	path = libraries/nghttp2
 	url = https://github.com/nghttp2/nghttp2
+	ignore = dirty
 [submodule "libraries/googletest"]
 	path = libraries/googletest
 	url = https://github.com/google/googletest
+	ignore = dirty
 [submodule "libraries/Little-CMS"]
 	path = libraries/Little-CMS
 	url = https://github.com/mm2/Little-CMS
+	ignore = dirty
 [submodule "libraries/libtiff"]
 	path = libraries/libtiff
 	url = https://gitlab.com/libtiff/libtiff
+	ignore = dirty
+[submodule "libraries/libxml2"]
+	path = libraries/libxml2
+	url = https://github.com/GNOME/libxml2
+	ignore = dirty
+[submodule "libraries/json-c"]
+	path = libraries/json-c
+	url = https://github.com/json-c/json-c
+	ignore = dirty
+[submodule "libraries/libevent"]
+	path = libraries/libevent
+	url = https://github.com/libevent/libevent
+	ignore = dirty
+[submodule "libraries/mbedtls"]
+	path = libraries/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls
+	ignore = dirty
+[submodule "libraries/libsodium"]
+	path = libraries/libsodium
+	url = https://github.com/jedisct1/libsodium
+	ignore = dirty
+[submodule "libraries/libyaml"]
+	path = libraries/libyaml
+	url = https://github.com/yaml/libyaml
+	ignore = dirty
+[submodule "libraries/libwebp"]
+	path = libraries/libwebp
+	url = https://chromium.googlesource.com/webm/libwebp
+	ignore = dirty
+[submodule "libraries/libusb"]
+	path = libraries/libusb
+	url = https://github.com/libusb/libusb
+	ignore = dirty
