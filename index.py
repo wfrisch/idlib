@@ -106,9 +106,9 @@ con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
 
 
-def get_sourceinfos(git, lib_name, commit):
+def get_sourceinfos(git, lib_name, commitinfo):
     result = []
-    commit_hash, commit_time, paths, _ = commit
+    commit_hash, commit_time, paths, _ = commitinfo
     commit_desc = git.describe(commit_hash)
     if not commit_desc:
         commit_desc = "0^" + commit_time.strftime("%Y%m%d.") + commit_hash
@@ -132,16 +132,16 @@ def get_sourceinfos(git, lib_name, commit):
     #       end='\r')
     return result
 
-def get_all_sourceinfos(git, lib_name, commit_tuples):
+def get_all_sourceinfos(git, lib_name, commitinfos):
     result = []
-    for commit in commit_tuples:
-       result += get_sourceinfos(git, lib_name, commit)
+    for ci in commitinfos:
+       result += get_sourceinfos(git, lib_name, ci)
     return result
 
-def get_all_sourceinfos_parallel(git, lib_name, commit_tuples):
+def get_all_sourceinfos_parallel(git, lib_name, commitinfos):
     result = []
     with ThreadPoolExecutor() as executor:
-        futures = [executor.submit(get_sourceinfos, git, lib_name, commit) for commit in commit_tuples]
+        futures = [executor.submit(get_sourceinfos, git, lib_name, ci) for ci in commitinfos]
         for future in concurrent.futures.as_completed(futures):
             result += future.result()
     return result
@@ -152,20 +152,17 @@ def index_full():
         sys.stdout.flush()
         git = GitRepo(libpath(lib))
         print("- fetching list of all commits")
-        commits = git.all_commits_with_metadata()
+        commitinfos = git.all_commits_with_metadata()
         # commit_hashes = list(map(lambda c: c[0], commits))
         num_files = 0
-        for commit in commits:
-            num_files += len(commit[2])
-        print(f"- hashing {num_files} files in {len(commits)} commits")
-        sourceinfos = get_all_sourceinfos_parallel(git, lib.name, commits)
+        for ci in commitinfos:
+            num_files += len(ci.paths)
+        print(f"- hashing {num_files} files in {len(commitinfos)} commits")
+        sourceinfos = get_all_sourceinfos_parallel(git, lib.name, commitinfos)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
         for info in sourceinfos:
-            try:
-                cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
-            except sqlite3.IntegrityError as e:
-                print("IntegrityError:", e, info)
+            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
         con.commit()
         print()
         sys.stdout.flush()
@@ -203,7 +200,7 @@ def index_sparse():
 
         print(f"collected {len(sourceinfos)} hashes.")
         for info in sourceinfos.values():
-            cur.execute('''REPLACE INTO files VALUES (?,?,?,?,?,?,?)''', info)
+            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
         con.commit()
         print()
         sys.stdout.flush()
@@ -221,7 +218,7 @@ def prune():
     print("- delete embedded copies")
     for a_lib, b_libs in config.embedded.items():
         for b_lib in b_libs:
-            print(f"  - {a_lib}: subtract {b_lib}")
+            print(f"  - {a_lib} -= {b_lib}")
             to_delete = []
             rows = cur.execute('''SELECT a.library, a.sha256, a.path FROM files a JOIN files b ON a.sha256 = b.sha256 WHERE a.library = ? AND b.library = ?;''', (a_lib, b_lib))
             for row in rows:

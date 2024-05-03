@@ -69,7 +69,7 @@ if args.summarize:
 else:
     for lib_name, findings in sorted(lib_findings.items()):
         for f in findings:
-            print(f.row.library, f.row.commit_desc, f.rel_path)
+            print(f"{f.row.library:10s}  {f.row.commit_desc:30s}  {f.rel_path}")
         sys.stdout.flush()
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
