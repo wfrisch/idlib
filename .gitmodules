@@ -226,3 +226,6 @@
 	path = libraries/botan
 	url = https://github.com/randombit/botan
 	ignore = dirty
+[submodule "libraries/libsndfile"]
+	path = libraries/libsndfile
+	url = https://github.com/libsndfile/libsndfile
