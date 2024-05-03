@@ -221,3 +221,8 @@
 [submodule "libraries/libzmq"]
 	path = libraries/libzmq
 	url = https://github.com/zeromq/libzmq
+	ignore = dirty
+[submodule "libraries/botan"]
+	path = libraries/botan
+	url = https://github.com/randombit/botan
+	ignore = dirty
