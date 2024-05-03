@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import collections
 import os
 import pygit2
 import subprocess
@@ -20,6 +21,11 @@ def is_git_repository(directory):
 
 class GitException(Exception):
     pass
+
+
+CommitInfo = collections.namedtuple('CommitInfo',
+    ['commit_hash', 'commit_time', 'paths', 'commit_desc'],
+    defaults=(None,None,))
 
 
 class GitRepo:
@@ -118,7 +124,7 @@ class GitRepo:
                               'HEAD'], capture_output=True, text=True)
         return int(proc.stdout.strip())
 
-    def all_commits_with_metadata(self, describe=False):
+    def all_commits_with_metadata(self, describe=False) -> list[CommitInfo]:
         result = []
         cmdline = self.gitcmd + ['log', '--all', '--name-only',
                   '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
@@ -154,7 +160,7 @@ class GitRepo:
             commit_hash = match.group('hash')
             commit_time = datetime.fromisoformat(match.group('date'))
             paths = list(filter(lambda line: len(line) > 0, lines[1:]))
-            result.append((commit_hash, commit_time, paths, commit_desc))
+            result.append(CommitInfo(commit_hash, commit_time, paths, commit_desc))
         return result
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
