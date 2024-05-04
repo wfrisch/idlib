@@ -7,11 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ## [unreleased]
 
 ### Added
-- Add (almost) full index. The database is still pruned,
-  i.e. empty files and inter-repo duplicates are removed).
+- Full index (all files in all commits in all branches).
 
 ### Changed
-- Change database schema: columns renamed and reordered.
+- Database schema: columns renamed and reordered.
+- The sparse index now considers all branches, not just HEAD.
+- The GitHub workflow now generates both the sparse and the full index.
 
 ### Deprecated
 

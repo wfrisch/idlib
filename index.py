@@ -153,11 +153,10 @@ def index_full():
         git = GitRepo(libpath(lib))
         print("- fetching list of all commits")
         commitinfos = git.all_commits_with_metadata()
-        # commit_hashes = list(map(lambda c: c[0], commits))
         num_files = 0
         for ci in commitinfos:
             num_files += len(ci.paths)
-        print(f"- hashing {num_files} files in {len(commitinfos)} commits")
+        print(f"- found {num_files} files in {len(commitinfos)} commits")
         sourceinfos = get_all_sourceinfos_parallel(git, lib.name, commitinfos)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
@@ -173,33 +172,16 @@ def index_sparse():
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
         git = GitRepo(libpath(lib))
-        sourceinfos = {}
+        sourceinfos = []
         for foi in lib.files_of_interest:
-            for commit, path in git.commits_affecting_file_follow(foi):
-                commit_time = git.datetime(commit)
-                description = git.describe(commit)
-                if not description:
-                    description = "0^" + commit_time.strftime("%Y%m%d.") + commit
-
-                blob = git.file_bytes_at_commit(commit, path)
-                m = hashlib.sha256()
-                m.update(blob)
-                sha256 = m.hexdigest()
-
-                sourceinfos[sha256] = SourceInfo(sha256=sha256,
-                                                 library=lib.name,
-                                                 commit_hash=commit,
-                                                 commit_time=commit_time,
-                                                 commit_desc=description,
-                                                 path=path,
-                                                 size=len(blob)
-                                                 )
-
-                if args.verbose:
-                    print(f"{lib.name} {commit} {commit_time} {path} {description}")
-
-        print(f"collected {len(sourceinfos)} hashes.")
-        for info in sourceinfos.values():
+            commitinfos = git.all_commits_with_metadata(path=foi)
+            print(f"- found {len(commitinfos)} versions of {foi}")
+            sys.stdout.flush()
+            sourceinfos += get_all_sourceinfos_parallel(git, lib.name, commitinfos)
+        print(f"- total {len(sourceinfos)} files")
+        cur = con.cursor()
+        cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
+        for info in sourceinfos:
             cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
         con.commit()
         print()

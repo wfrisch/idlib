@@ -126,7 +126,7 @@ class GitRepo:
                               'HEAD'], capture_output=True, text=True)
         return int(proc.stdout.strip())
 
-    def all_commits_with_metadata(self, describe=False) -> list[CommitInfo]:
+    def all_commits_with_metadata(self, path=None, describe=False) -> list[CommitInfo]:
         result = []
         cmdline = self.gitcmd + ['log', '--all', '--name-only',
                   '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
@@ -135,6 +135,8 @@ class GitRepo:
             cmdline += ['--format=format:%(describe:tags) %H %ad']
         else:
             cmdline += ['--format=format:%H %ad']
+        if path:
+            cmdline += ['--follow', path]
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         # First line: {tag} {commit_hash} {commit_time}
         # {tag} may be empty
