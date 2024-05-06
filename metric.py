@@ -54,53 +54,23 @@ Suggested config:
 ]
 ```
 
-- TimeCov [0..1] describes the lifespan of a file in the repo
-- CommitCov [0..1] describes how many commits affected a file
-  - TODO: count commits in the lifetime of the file instead of the repo
+- TimeCov [0..1] lifespan of a file in the repo
+- CommitCov [0..1] ratio of commits affecting a file within its lifespan
 - Score [0..1] = TimeCov * CommitCov
 
 This is a rather simple metric and developers should review and adjust the
 suggestion manually.
 """
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
+import argparse
+import collections
+import json
+from pathlib import Path
 import re
 import sys
-import json
-import argparse
-from pathlib import Path
 
 from git import GitRepo
-
-
-class Candidate:
-    def __init__(self, repo, path):
-        self.repo = repo
-        self.path = str(path)
-        self.num_commits = None
-        self.dt_latest = None
-        self.dt_oldest = None
-
-        commits = self._commits()
-        self.num_commits = len(commits)
-        self.dt_latest = self.repo.datetime(commits[0])
-        self.dt_oldest = self.repo.datetime(commits[-1])
-
-        self.time_cov = self._time_coverage()
-        self.commit_cov = self._commit_coverage()
-        self.score = self.time_cov * self.commit_cov
-
-    def _commits(self):
-        return [x[0] for x in git.commits_affecting_file_follow(relpath)]
-
-    def _time_coverage(self) -> float:  # [0..1]
-        dt_repo_oldest = self.repo.datetime(self.repo.first_commit())
-        dt_repo_latest = self.repo.datetime(self.repo.current_hash())
-        repo_delta = dt_repo_latest - dt_repo_oldest
-        this_delta = self.dt_latest - self.dt_oldest
-        coverage = this_delta.total_seconds() / repo_delta.total_seconds()
-        return coverage
-
-    def _commit_coverage(self) -> float:  # [0..1]
-        return self.num_commits / self.repo.count_commits()
 
 
 parser = argparse.ArgumentParser(
@@ -115,28 +85,82 @@ repo_path = Path(args.repo_path)
 assert repo_path.is_dir()
 git = GitRepo(repo_path)
 
-print("This may take a long time, depending on the repo size...")
 
-re_cc_filename = re.compile(r'.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$', re.I)
+Candidate = collections.namedtuple('Candidate', 'path,score,time_cov,commit_cov')
 
-candidates = []
-for path in repo_path.glob('**/*'):
-    relpath = path.relative_to(repo_path)
-    if re_cc_filename.match(path.name) and path.is_file():
-        c = Candidate(git, str(relpath))
-        candidates.append(c)
-    print(".", end='')
+
+all_commitinfos = git.all_commits_with_metadata()
+
+def num_commits_in_timespan(git, start, end):
+    cnt = 0
+    for ci in all_commitinfos:
+        if ci.commit_time >= start and ci.commit_time <= end:
+            cnt += 1
+    return cnt
+
+def evaluate(git, path) -> float:
+    print("eval:", path)
     sys.stdout.flush()
-print("\n")
+    commitinfos = git.all_commits_with_metadata(path)
+    num_commits = len(commitinfos)
+    dt_repo_latest = git.datetime(git.current_hash())
+    dt_repo_oldest = git.datetime(git.first_commit())
+    td_repo = dt_repo_latest - dt_repo_oldest
 
+    # Time coverage [0..1]
+    td = commitinfos[0].commit_time - commitinfos[-1].commit_time
+    time_cov = td.total_seconds() / td_repo.total_seconds()
+
+    # Commit coverage [0..1]
+    # a) ratio of total commits
+    # commit_cov = num_commits / git.count_commits()
+    # b) commit ratio within file's lifetime
+    ncits = num_commits_in_timespan(
+        git,
+        commitinfos[-1].commit_time,
+        commitinfos[0].commit_time)
+    if ncits > 0:
+        commit_cov = num_commits / ncits
+    else:
+        # why is this happening for one file in the botan repo?
+        # botan/src/tests/test_xof.cpp
+        commit_cov = 0.0
+
+    # Score [0..1]
+    score = time_cov * commit_cov
+
+    return Candidate(path, score, time_cov, commit_cov)
+
+
+def evaluate_all(git, paths):
+    results = []
+    with ThreadPoolExecutor() as executor:
+        futures = [executor.submit(evaluate, git, path) for path in paths]
+        for future in concurrent.futures.as_completed(futures):
+            results.append(future.result())
+    return results
+
+
+print("This may take a long time.")
+paths = []
+re_cc_filename = re.compile(r'.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$', re.I)
+for path in repo_path.glob('**/*'):
+    if re_cc_filename.match(path.name) and path.is_file():
+        paths.append(path.relative_to(repo_path))
+print(f"Evaluating {len(paths)} files...")
+sys.stdout.flush()
+
+candidates = evaluate_all(git, paths)
 candidates.sort(key=lambda c: c.score, reverse=True)
+print("\n")
 print("Score  TimeCov  CommitCov  Path")
 for c in candidates[:args.limit]:
     print(f"{c.score:.3f}  {c.time_cov:.3f}    {c.commit_cov:.3f}      {c.path}")
 
 print()
 print("Suggested config:")
-paths = [c.path for c in candidates[:args.limit]]
+
+#paths = [s.path for c in candidates[:args.limit]]
 #print(json.dumps(paths, indent=4))
 
 print('            [')
