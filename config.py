@@ -2,8 +2,8 @@
 from collections import namedtuple
 
 Library = namedtuple('Library',
-                     ['name', 'sparse_files', 'medium_files'],
-                     defaults=(None,None))
+                     ['name', 'sparse_files'],
+                     defaults=(None,))
 
 libraries = [
     Library('boringssl', [
