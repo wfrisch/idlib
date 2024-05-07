@@ -173,9 +173,9 @@ def index_sparse():
         sys.stdout.flush()
         git = GitRepo(libpath(lib))
         sourceinfos = []
-        for foi in lib.sparse_files:
-            commitinfos = git.all_commits_with_metadata(path=foi)
-            print(f"- found {len(commitinfos)} versions of {foi}")
+        for p in lib.sparse_paths:
+            commitinfos = git.all_commits_with_metadata(path=p)
+            print(f"- found {len(commitinfos)} versions of {p}")
             sys.stdout.flush()
             sourceinfos += get_all_sourceinfos_parallel(git, lib.name, commitinfos)
         print(f"- total {len(sourceinfos)} files")

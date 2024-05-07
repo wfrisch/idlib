@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
-from collections import namedtuple
+from pathlib import Path
+import re
 
-Library = namedtuple('Library',
-                     ['name', 'sparse_files'],
-                     defaults=(None,))
+
+re_source = re.compile(r'.*\.(c|cc|cpp|cxx|h|hh|hpp|hxx|asm|S)$', re.I)
+
+
+class Library:
+    def __init__(self, name, sparse_files=[]):
+        self.name = name
+        self.sparse_files = sparse_files
+
+    @property
+    def path(self):
+        return Path("libraries") / self.name
+
+    @property
+    def sparse_paths(self):
+        for f in self.sparse_files:
+            for p in self.path.glob(f):
+                if re_source.match(p.name) and p.is_file():
+                    yield p.relative_to(self.path)
+
 
 libraries = [
     Library('boringssl', [
