@@ -229,3 +229,6 @@
 [submodule "libraries/libsndfile"]
 	path = libraries/libsndfile
 	url = https://github.com/libsndfile/libsndfile
+[submodule "libraries/libgcrypt"]
+	path = libraries/libgcrypt
+	url = https://github.com/gpg/libgcrypt
