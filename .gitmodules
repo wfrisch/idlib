@@ -235,3 +235,6 @@
 [submodule "libraries/libjxl"]
 	path = libraries/libjxl
 	url = https://github.com/libjxl/libjxl
+[submodule "libraries/wolfssl"]
+	path = libraries/wolfssl
+	url = https://github.com/wolfSSL/wolfssl/
