@@ -232,3 +232,6 @@
 [submodule "libraries/libgcrypt"]
 	path = libraries/libgcrypt
 	url = https://github.com/gpg/libgcrypt
+[submodule "libraries/libjxl"]
+	path = libraries/libjxl
+	url = https://github.com/libjxl/libjxl
