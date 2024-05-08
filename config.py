@@ -844,7 +844,6 @@ libraries = [
     Library('pcre2', [
         "src/*",
         ]),
-    Library('protobuf', []),
     Library('sqlite', [
         "src/sqliteInt.h",
         "src/vdbe.c",
@@ -966,7 +965,7 @@ embedded = {
     "libsndfile": ["flac"],
     "minizip-ng": ["xz"],
     "openjpeg":   ["libpng", "libtiff", "Little-CMS", "zlib"],
-    "protobuf":   ["googletest"],
+    #"protobuf":   ["googletest"],
     "zlib":       ["minizip-ng"],
     "zstd":       ["xxHash", "zlib"],
 }

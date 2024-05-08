@@ -106,10 +106,6 @@
 	path = libraries/libbpf
 	url = https://github.com/libbpf/libbpf
 	ignore = dirty
-[submodule "libraries/protobuf"]
-	path = libraries/protobuf
-	url = https://github.com/protocolbuffers/protobuf/
-	ignore = dirty
 [submodule "libraries/uthash"]
 	path = libraries/uthash
 	url = https://github.com/troydhanson/uthash

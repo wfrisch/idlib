@@ -151,6 +151,10 @@ class GitRepo:
         re_line0 = re.compile(
                 r'(?P<desc>[^ ]+)?\s?(?P<hash>[0-9a-f]{40,})\s+(?P<date>.*)')
 
+        if len(proc.stdout) == 0:
+            # happens rarely when --diff-filter leaves no commits
+            return []
+
         chunks = proc.stdout.split('\0\0')
         for chunk in chunks:
             # if -z is combined with --name-only,
@@ -159,7 +163,7 @@ class GitRepo:
             lines = re.split(r'[\0|\n]', chunk)
             match = re_line0.match(lines[0])
             if not match:
-                raise ValueError("unexpected line0: " + lines[0])
+                raise ValueError(f"ACWM({path}) unexpected line0: " + lines[0])
             commit_desc = match.group('desc') # can be None
             commit_hash = match.group('hash')
             commit_time = datetime.fromisoformat(match.group('date'))
