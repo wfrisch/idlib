@@ -87,6 +87,9 @@ if args.library:
 else:
     libraries = config.libraries
 
+if len(libraries) == 0:
+    print("No libraries found.", file=sys.stderr)
+    sys.exit(1)
 
 for lib in libraries:
     print(f"Checking configuration for {lib.name:15s} ", end='')
