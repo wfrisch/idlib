@@ -165,7 +165,7 @@ print("Suggested config:")
 
 print('            [')
 for c in candidates[:args.limit]:
-    print(f'             "{c.path}",')
+    print(f'        "{c.path}",')
 print('            ]),')
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
