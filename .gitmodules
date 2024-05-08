@@ -238,3 +238,6 @@
 [submodule "libraries/wolfssl"]
 	path = libraries/wolfssl
 	url = https://github.com/wolfSSL/wolfssl/
+[submodule "libraries/aom"]
+	path = libraries/aom
+	url = https://aomedia.googlesource.com/aom/

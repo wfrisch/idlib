@@ -34,6 +34,17 @@ In the long run we could scrap the sparse mode, as soon as full mode has better
 filters and fewer false positives,
 """
 libraries = [
+    Library('aom', [
+        "av1/encoder/rdopt.c",
+        "av1/encoder/encoder.c",
+        "av1/encoder/partition_search.c",
+        "av1/encoder/encodeframe.c",
+        "av1/decoder/decodeframe.c",
+        "av1/encoder/bitstream.c",
+        "av1/encoder/encoder.h",
+        "av1/common/blockd.h",
+        "av1/decoder/decodemv.c",
+        ]),
     Library('boringssl', [
         "ssl/internal.h",
         "ssl/ssl_lib.cc",
