@@ -955,6 +955,7 @@ libraries = [
 
 # Some libraries embed code themselves:
 embedded = {
+    "aom":        ["googletest"],
     "boringssl":  ["googletest"],
     # botan embeds numerous test files from these:
     "botan":      ["boringssl", "mbedtls"],
