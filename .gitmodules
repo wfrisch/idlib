@@ -237,3 +237,6 @@
 [submodule "libraries/aom"]
 	path = libraries/aom
 	url = https://aomedia.googlesource.com/aom/
+[submodule "libraries/ocf"]
+	path = libraries/ocf
+	url = https://github.com/Open-CAS/ocf/
