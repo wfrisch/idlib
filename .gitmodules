@@ -240,3 +240,6 @@
 [submodule "libraries/ocf"]
 	path = libraries/ocf
 	url = https://github.com/Open-CAS/ocf/
+[submodule "libraries/libexpat"]
+	path = libraries/libexpat
+	url = https://github.com/libexpat/libexpat
