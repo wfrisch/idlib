@@ -243,3 +243,6 @@
 [submodule "libraries/libexpat"]
 	path = libraries/libexpat
 	url = https://github.com/libexpat/libexpat
+[submodule "libraries/libarchive"]
+	path = libraries/libarchive
+	url = https://github.com/libarchive/libarchive
