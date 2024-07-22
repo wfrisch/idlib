@@ -246,3 +246,6 @@
 [submodule "libraries/libarchive"]
 	path = libraries/libarchive
 	url = https://github.com/libarchive/libarchive
+[submodule "libraries/assimp"]
+	path = libraries/assimp
+	url = https://github.com/assimp/assimp
