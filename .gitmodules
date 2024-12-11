@@ -258,3 +258,6 @@
 [submodule "libraries/lz4"]
 	path = libraries/lz4
 	url = https://github.com/lz4/lz4
+[submodule "libraries/yyjson"]
+	path = libraries/yyjson
+	url = https://github.com/ibireme/yyjson

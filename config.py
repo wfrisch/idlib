@@ -1099,6 +1099,10 @@ libraries = [
         "wolfssl/openssl/ssl.h",
         "wolfcrypt/src/pkcs7.c",
         ]),
+    Library('yyjson', [
+        "src/yyjson.c",
+        "src/yyjson.h",
+        ]),
     Library('xxHash', [
         "xxhash.h",
         "xxh3.h",
