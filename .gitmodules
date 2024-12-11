@@ -255,3 +255,6 @@
 [submodule "libraries/libssh"]
 	path = libraries/libssh
 	url = https://git.libssh.org/projects/libssh.git/
+[submodule "libraries/lz4"]
+	path = libraries/lz4
+	url = https://github.com/lz4/lz4
