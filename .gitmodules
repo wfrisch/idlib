@@ -252,3 +252,6 @@
 [submodule "libraries/bzip2"]
 	path = libraries/bzip2
 	url = git://sourceware.org/git/bzip2.git
+[submodule "libraries/libssh"]
+	path = libraries/libssh
+	url = https://git.libssh.org/projects/libssh.git/
