@@ -159,6 +159,23 @@ libraries = [
     Library('brotli', [
         "c/**/*",
         ]),
+    Library('bzip2', [
+        "bzip2.c",
+        "bzip2recover.c",
+        "decompress.c",
+        "bzlib.c",
+        "compress.c",
+        "blocksort.c",
+        "dlltest.c",
+        "bzlib.h",
+        "huffman.c",
+        "crctable.c",
+        "bzlib_private.h",
+        "randtable.c",
+        "spewG.c",
+        "unzcrash.c",
+        "mk251.c",
+        ]),
     Library('curl', [
         "lib/url.c",
         "lib/urldata.h",

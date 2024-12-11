@@ -249,3 +249,6 @@
 [submodule "libraries/assimp"]
 	path = libraries/assimp
 	url = https://github.com/assimp/assimp
+[submodule "libraries/bzip2"]
+	path = libraries/bzip2
+	url = git://sourceware.org/git/bzip2.git
