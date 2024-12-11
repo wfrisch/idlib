@@ -261,3 +261,6 @@
 [submodule "libraries/yyjson"]
 	path = libraries/yyjson
 	url = https://github.com/ibireme/yyjson
+[submodule "libraries/rapidjson"]
+	path = libraries/rapidjson
+	url = https://github.com/Tencent/rapidjson/

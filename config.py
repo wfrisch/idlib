@@ -1039,6 +1039,28 @@ libraries = [
     Library('pcre2', [
         "src/*",
         ]),
+    Library('rapidjson', [
+        "include/rapidjson/document.h",
+        "include/rapidjson/schema.h",
+        "include/rapidjson/reader.h",
+        "test/unittest/readertest.cpp",
+        "include/rapidjson/rapidjson.h",
+        "test/unittest/schematest.cpp",
+        "test/unittest/valuetest.cpp",
+        "include/rapidjson/writer.h",
+        "include/rapidjson/pointer.h",
+        "include/rapidjson/internal/regex.h",
+        "test/unittest/pointertest.cpp",
+        "test/unittest/writertest.cpp",
+        "include/rapidjson/allocators.h",
+        "test/unittest/documenttest.cpp",
+        "include/rapidjson/prettywriter.h",
+        "test/perftest/rapidjsontest.cpp",
+        "include/rapidjson/internal/stack.h",
+        "include/rapidjson/encodings.h",
+        "include/rapidjson/internal/strtod.h",
+        "test/unittest/uritest.cpp",
+        ]),
     Library('sqlite', [
         "src/sqliteInt.h",
         "src/vdbe.c",
@@ -1169,7 +1191,9 @@ embedded = {
     "lz4":        ["xxHash"],
     "minizip-ng": ["xz"],
     "openjpeg":   ["libpng", "libtiff", "Little-CMS", "zlib"],
+    "rapidjson":  ["googletest"],
     #"protobuf":   ["googletest"],
+    "yyjson":     ["rapidjson"],  # embeds test cases
     "zlib":       ["minizip-ng"],
     "zstd":       ["xxHash", "zlib"],
 }
