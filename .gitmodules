@@ -264,3 +264,6 @@
 [submodule "libraries/rapidjson"]
 	path = libraries/rapidjson
 	url = https://github.com/Tencent/rapidjson/
+[submodule "libraries/libvterm"]
+	path = libraries/libvterm
+	url = https://github.com/wfrisch/libvterm-mirror
