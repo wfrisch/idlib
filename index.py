@@ -12,20 +12,6 @@ from git import GitRepo
 import config
 
 
-# try:
-#     import magic
-#     def mime_type_from_blob(blob):
-#         return magic.from_buffer(blob, mime=True)
-# except ModuleNotFoundError:
-#     print("python-magic not found, falling back /usr/bin/file",
-#           file=sys.stderr)
-#     import subprocess
-#     def mime_type_from_blob(blob):
-#         proc = subprocess.run(['file', '-b', '--mime-type', '-'],
-#             capture_output=True, text=True, input=blob, check=True)
-#         return proc.stdout.strip()
-
-
 def libpath(lib):
     return Path("libraries") / lib.name
 
@@ -43,7 +29,6 @@ CREATE TABLE IF NOT EXISTS files (
                        -- ... falls back to: 0^{date}.{commit_hash}
     path        TEXT,  -- file path at the time of the matched commit
     size        INTEGER
-    -- mime_type   TEXT   -- $(file -b --mime-type < blob)
 );
 CREATE INDEX IF NOT EXISTS files_sha256_index ON files(sha256);
 CREATE INDEX IF NOT EXISTS files_library_index ON files(library);
@@ -63,7 +48,6 @@ SourceInfo = collections.namedtuple(
                        'commit_desc',
                        'path',
                        'size',
-                       # 'mime_type'
                        ])
 
 
@@ -121,7 +105,6 @@ def get_sourceinfos(git, lib_name, commitinfo):
         m = hashlib.sha256()
         m.update(blob)
         sha256 = m.hexdigest()
-        # mime_type = mime_type_from_blob(blob)
         result.append(SourceInfo(sha256=sha256,
                                  library=lib_name,
                                  commit_hash=commit_hash,
@@ -129,7 +112,6 @@ def get_sourceinfos(git, lib_name, commitinfo):
                                  commit_desc=commit_desc,
                                  path=path,
                                  size=file_size,
-                                 # mime_type=mime_type
                                  ))
     # print(f"{cnt_commits}/{len(commits)} commits  {cnt_hashes} hashes",
     #       end='\r')
