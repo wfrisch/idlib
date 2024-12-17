@@ -16,27 +16,24 @@ def libpath(lib):
     return Path("libraries") / lib.name
 
 
-# Normalization could save a bit of space but not that much. Only `time` and
-# `commit_desc` could be in a separate table. Not worth it, IMHO. It's much
-# easier to query a single table.
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
     sha256      TEXT,
-    library     TEXT,  -- name of the library
-    commit_hash TEXT,  -- git commit that introduced this version
-    commit_time TEXT,  -- git commit timestamp (ISO 8601 format)
-    commit_desc TEXT,  -- git describe for this commit,
-                       -- ... falls back to: 0^{date}.{commit_hash}
-    path        TEXT,  -- file path at the time of the matched commit
+    library     TEXT,     -- name of the library
+    commit_hash TEXT,     -- git commit that introduced this version
+    commit_time TEXT,     -- git commit timestamp (ISO 8601 format)
+    commit_desc TEXT,     -- git describe for this commit,
+                          -- ... falls back to: 0^{date}.{commit_hash}
+    path        TEXT,     -- file path at the time of the matched commit
     size        INTEGER
 );
 CREATE INDEX IF NOT EXISTS files_sha256_index ON files(sha256);
 CREATE INDEX IF NOT EXISTS files_library_index ON files(library);
 
-CREATE TABLE IF NOT EXISTS libraries (  -- optional
+CREATE TABLE IF NOT EXISTS libraries (  -- not implemented
     library     TEXT PRIMARY KEY,
-    git_remote  TEXT,  -- git remote URI
-    summary     TEXT   -- short summary of the library
+    git_remote  TEXT,     -- git remote URI
+    summary     TEXT      -- short summary of the library
 );
 '''
 
