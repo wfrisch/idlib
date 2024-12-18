@@ -38,15 +38,13 @@ CREATE TABLE IF NOT EXISTS libraries (  -- not implemented
 );
 '''
 
-SourceInfo = collections.namedtuple(
-        'SourceInfo', ['sha256',
-                       'library',
-                       'commit_hash',
-                       'commit_time',
-                       'commit_desc',
-                       'path',
-                       'size',
-                       ])
+FileRecord = collections.namedtuple('FileRecord', ['sha256',
+                                                   'library',
+                                                   'commit_hash',
+                                                   'commit_time',
+                                                   'commit_desc',
+                                                   'path',
+                                                   'size', ])
 
 
 parser = argparse.ArgumentParser()
@@ -93,7 +91,7 @@ con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
 
 
-def get_sourceinfos(lib_name, commitinfo):
+def get_filerecords(lib_name, commitinfo):
     global git
     result = []
     commit_hash, commit_time, paths, _ = commitinfo
@@ -106,7 +104,7 @@ def get_sourceinfos(lib_name, commitinfo):
         m = hashlib.sha256()
         m.update(blob)
         sha256 = m.hexdigest()
-        result.append(SourceInfo(sha256=sha256,
+        result.append(FileRecord(sha256=sha256,
                                  library=lib_name,
                                  commit_hash=commit_hash,
                                  commit_time=commit_time,
@@ -124,13 +122,13 @@ def process_init(repo_path):
     git = GitRepo(repo_path)
 
 
-def get_all_sourceinfos_parallel(repo_path, lib_name, commitinfos,
+def get_all_filerecords_parallel(repo_path, lib_name, commitinfos,
                                  max_workers):
     result = []
     with ProcessPoolExecutor(max_workers=max_workers,
                              initializer=process_init,
                              initargs=(repo_path,)) as executor:
-        futures = [executor.submit(get_sourceinfos, lib_name, ci) for ci in
+        futures = [executor.submit(get_filerecords, lib_name, ci) for ci in
                    commitinfos]
         for future in concurrent.futures.as_completed(futures):
             result += future.result()
@@ -148,13 +146,13 @@ def index_full(max_workers):
         for ci in commitinfos:
             num_files += len(ci.paths)
         print(f"- found {num_files} files in {len(commitinfos)} commits")
-        sourceinfos = get_all_sourceinfos_parallel(libpath(lib), lib.name,
+        filerecords = get_all_filerecords_parallel(libpath(lib), lib.name,
                                                    commitinfos,
                                                    max_workers=max_workers)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for info in sourceinfos:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
+        for fr in filerecords:
+            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', fr)
         con.commit()
         print()
         sys.stdout.flush()
@@ -165,19 +163,19 @@ def index_sparse(max_workers):
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
         git = GitRepo(libpath(lib))
-        sourceinfos = []
+        filerecords = []
         for p in lib.sparse_paths:
             commitinfos = git.all_commits_with_metadata(path=p)
             print(f"- found {len(commitinfos)} versions of {p}")
             sys.stdout.flush()
-            sourceinfos += get_all_sourceinfos_parallel(libpath(lib), lib.name,
+            filerecords += get_all_filerecords_parallel(libpath(lib), lib.name,
                                                         commitinfos,
                                                         max_workers=max_workers)
-        print(f"- total {len(sourceinfos)} files")
+        print(f"- total {len(filerecords)} files")
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for info in sourceinfos:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
+        for fr in filerecords:
+            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', fr)
         con.commit()
         print()
         sys.stdout.flush()
