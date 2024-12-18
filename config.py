@@ -1058,6 +1058,21 @@ libraries = [
     Library('pcre2', [
         "src/*",
         ]),
+    Library('popt', [
+        "src/popt.c",
+        "src/popthelp.c",
+        "src/popt.h",
+        "src/poptconfig.c",
+        "tests/test1.c",
+        "src/poptint.h",
+        "src/poptparse.c",
+        "src/system.h",
+        "src/poptint.c",
+        "tests/test2.c",
+        "tests/tdict.c",
+        "src/lookup3.c",
+        "tests/test3.c",
+        ]),
     Library('rapidjson', [
         "include/rapidjson/document.h",
         "include/rapidjson/schema.h",

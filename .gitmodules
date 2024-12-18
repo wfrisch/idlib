@@ -267,3 +267,6 @@
 [submodule "libraries/libvterm"]
 	path = libraries/libvterm
 	url = https://github.com/wfrisch/libvterm-mirror
+[submodule "libraries/popt"]
+	path = libraries/popt
+	url = https://github.com/rpm-software-management/popt
