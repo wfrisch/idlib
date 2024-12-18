@@ -65,7 +65,6 @@ import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 import argparse
 import collections
-import json
 from pathlib import Path
 import re
 import sys
@@ -73,6 +72,12 @@ import sys
 from git import GitRepo
 
 
+# Types
+Candidate = collections.namedtuple('Candidate',
+                                   'path,score,time_cov,commit_cov')
+
+
+# CLI
 parser = argparse.ArgumentParser(
         prog="metric.py",
         description="helps with the file selection for new libraries")
@@ -81,15 +86,16 @@ parser.add_argument("-l", "--limit", type=int, default=20,
                     help="limit the number of results. default: 20")
 args = parser.parse_args()
 
+
+# Sanity check
 repo_path = Path(args.repo_path)
 assert repo_path.is_dir()
 git = GitRepo(repo_path)
 
 
-Candidate = collections.namedtuple('Candidate', 'path,score,time_cov,commit_cov')
-
-
+# Main
 all_commitinfos = git.all_commits_with_metadata()
+
 
 def num_commits_in_timespan(git, start, end):
     cnt = 0
@@ -97,6 +103,7 @@ def num_commits_in_timespan(git, start, end):
         if ci.commit_time >= start and ci.commit_time <= end:
             cnt += 1
     return cnt
+
 
 def evaluate(git, path) -> float:
     print("eval:", path)
@@ -159,10 +166,6 @@ for c in candidates[:args.limit]:
 
 print()
 print("Suggested config:")
-
-#paths = [s.path for c in candidates[:args.limit]]
-#print(json.dumps(paths, indent=4))
-
 print('            [')
 for c in candidates[:args.limit]:
     print(f'        "{c.path}",')

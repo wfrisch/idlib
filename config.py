@@ -22,6 +22,7 @@ class Library:
                 if re_source.match(p.name) and p.is_file():
                     yield p.relative_to(self.path)
 
+
 """
 Library configuration.
 
@@ -694,7 +695,7 @@ libraries = [
         "src/w64.c",
         ]),
     Library('libtiff', [
-       "libtiff/tif_dirread.c",
+        "libtiff/tif_dirread.c",
         "contrib/pds/tif_pdsdirread.c",
         "libtiff/tif_dir.c",
         "libtiff/tif_jpeg.c",
@@ -1203,15 +1204,17 @@ embedded = {
     "botan":      ["boringssl", "mbedtls"],
     "fmt":        ["googletest"],
     "freetype":   ["zlib"],
-    "libjxl":     ["brotli", "googletest", "Little-CMS", "libjpeg-turbo", "libpng"],
+    "libjxl":     ["brotli", "googletest", "Little-CMS", "libjpeg-turbo",
+                   "libpng"],
     "libpng":     ["zlib"],
     "libsndfile": ["flac"],
     "lz4":        ["xxHash"],
     "minizip-ng": ["xz"],
     "openjpeg":   ["libpng", "libtiff", "Little-CMS", "zlib"],
     "rapidjson":  ["googletest"],
-    #"protobuf":   ["googletest"],
-    "yyjson":     ["rapidjson"],  # embeds test cases
+    # "protobuf":   ["googletest"],
+    # yyjson embeds test cases from rapidjson
+    "yyjson":     ["rapidjson"],
     "zlib":       ["minizip-ng"],
     "zstd":       ["xxHash", "zlib"],
 }

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import argparse
 import collections
 import concurrent.futures
@@ -13,9 +12,14 @@ from git import GitRepo
 import config
 
 
-def libpath(lib):
-    return Path("libraries") / lib.name
-
+# Types
+FileRecord = collections.namedtuple('FileRecord', ['sha256',
+                                                   'library',
+                                                   'commit_hash',
+                                                   'commit_time',
+                                                   'commit_desc',
+                                                   'path',
+                                                   'size', ])
 
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
@@ -38,17 +42,8 @@ CREATE TABLE IF NOT EXISTS libraries (  -- not implemented
 );
 '''
 
-SourceInfo = collections.namedtuple(
-        'SourceInfo', ['sha256',
-                       'library',
-                       'commit_hash',
-                       'commit_time',
-                       'commit_desc',
-                       'path',
-                       'size',
-                       ])
 
-
+# CLI
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", help="database path. Default: ./idlib.sqlite",
                     dest="db", default='idlib.sqlite')
@@ -71,6 +66,8 @@ if args.library:
 else:
     libraries = config.libraries
 
+
+# Sanity check
 if len(libraries) == 0:
     print("No libraries found.", file=sys.stderr)
     sys.exit(1)
@@ -78,7 +75,7 @@ if len(libraries) == 0:
 for lib in libraries:
     print(f"Checking configuration for {lib.name:15s} ", end='')
     try:
-        git = GitRepo(libpath(lib))
+        git = GitRepo(lib.path)
     except ValueError as e:
         print(e)
         sys.exit(1)
@@ -89,11 +86,14 @@ for lib in libraries:
 print()
 
 
+# Setup database
 con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
+git = None  # set by the initializer of each forked worker process
 
 
-def get_sourceinfos(lib_name, commitinfo):
+# Functions
+def get_filerecords(lib_name, commitinfo):
     global git
     result = []
     commit_hash, commit_time, paths, _ = commitinfo
@@ -106,7 +106,7 @@ def get_sourceinfos(lib_name, commitinfo):
         m = hashlib.sha256()
         m.update(blob)
         sha256 = m.hexdigest()
-        result.append(SourceInfo(sha256=sha256,
+        result.append(FileRecord(sha256=sha256,
                                  library=lib_name,
                                  commit_hash=commit_hash,
                                  commit_time=commit_time,
@@ -119,18 +119,17 @@ def get_sourceinfos(lib_name, commitinfo):
     return result
 
 
-def process_init(repo_path):
-    global git
-    git = GitRepo(repo_path)
-
-
-def get_all_sourceinfos_parallel(repo_path, lib_name, commitinfos,
-                                 max_workers):
+def get_all_filerecords(repo_path, lib_name, commitinfos, max_workers):
     result = []
+
+    def process_init(repo_path):
+        global git
+        git = GitRepo(repo_path)
+
     with ProcessPoolExecutor(max_workers=max_workers,
                              initializer=process_init,
                              initargs=(repo_path,)) as executor:
-        futures = [executor.submit(get_sourceinfos, lib_name, ci) for ci in
+        futures = [executor.submit(get_filerecords, lib_name, ci) for ci in
                    commitinfos]
         for future in concurrent.futures.as_completed(futures):
             result += future.result()
@@ -141,20 +140,19 @@ def index_full(max_workers):
     for lib in libraries:
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
-        git = GitRepo(libpath(lib))
+        git = GitRepo(lib.path)
         print("- fetching list of all commits")
         commitinfos = git.all_commits_with_metadata()
         num_files = 0
         for ci in commitinfos:
             num_files += len(ci.paths)
         print(f"- found {num_files} files in {len(commitinfos)} commits")
-        sourceinfos = get_all_sourceinfos_parallel(libpath(lib), lib.name,
-                                                   commitinfos,
-                                                   max_workers=max_workers)
+        filerecords = get_all_filerecords(lib.path, lib.name, commitinfos,
+                                          max_workers=max_workers)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for info in sourceinfos:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
+        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''',
+                        filerecords)
         con.commit()
         print()
         sys.stdout.flush()
@@ -164,20 +162,19 @@ def index_sparse(max_workers):
     for lib in libraries:
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
-        git = GitRepo(libpath(lib))
-        sourceinfos = []
+        git = GitRepo(lib.path)
+        filerecords = []
         for p in lib.sparse_paths:
             commitinfos = git.all_commits_with_metadata(path=p)
             print(f"- found {len(commitinfos)} versions of {p}")
             sys.stdout.flush()
-            sourceinfos += get_all_sourceinfos_parallel(libpath(lib), lib.name,
-                                                        commitinfos,
-                                                        max_workers=max_workers)
-        print(f"- total {len(sourceinfos)} files")
+            filerecords += get_all_filerecords(lib.path, lib.name, commitinfos,
+                                               max_workers=max_workers)
+        print(f"- total {len(filerecords)} files")
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for info in sourceinfos:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', info)
+        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''',
+                        filerecords)
         con.commit()
         print()
         sys.stdout.flush()
@@ -197,19 +194,29 @@ def prune():
         for b_lib in b_libs:
             print(f"  - {a_lib} -= {b_lib}")
             to_delete = []
-            rows = cur.execute('''SELECT a.library, a.sha256, a.path FROM files a JOIN files b ON a.sha256 = b.sha256 WHERE a.library = ? AND b.library = ?;''', (a_lib, b_lib))
+            rows = cur.execute(
+                    "SELECT a.library, a.sha256, a.path FROM files a "
+                    "JOIN files b ON a.sha256 = b.sha256 "
+                    "WHERE a.library = ? AND b.library = ?;",
+                    (a_lib, b_lib))
             for row in rows:
                 lib, sha256, path = row
                 to_delete.append((sha256, lib))
                 print(f"    - delete in {a_lib}: {sha256} {path}")
             for sha256, lib in to_delete:
-                cur.execute("DELETE FROM files WHERE sha256 = ? AND library = ?", (sha256, lib))
+                cur.execute("DELETE FROM files"
+                            "WHERE sha256 = ? AND library = ?", (sha256, lib))
     con.commit()
 
     print("- delete remaining duplicates: (check this list carefully)")
     cur = con.cursor()
     to_delete = []
-    rows = cur.execute('''SELECT a.library,b.library,a.sha256,a.path FROM files a JOIN (SELECT sha256,library,path,COUNT(*) c FROM files GROUP BY sha256 HAVING c > 1) b ON a.sha256 = b.sha256 WHERE a.library != b.library AND a.size > 0 ORDER BY a.library DESC;''')
+    rows = cur.execute(
+            "SELECT a.library, b.library, a.sha256, a.path FROM files a "
+            "JOIN (SELECT sha256,library,path,COUNT(*) c FROM files "
+            "GROUP BY sha256 HAVING c > 1) b ON a.sha256 = b.sha256 "
+            "WHERE a.library != b.library AND a.size > 0 "
+            "ORDER BY a.library DESC;")
     for row in rows:
         a_lib, b_lib, sha256, a_path = row
         to_delete.append(sha256)
@@ -224,6 +231,7 @@ def prune():
     con.commit()
 
 
+# Main
 if not args.prune_only:
     if args.mode == 'sparse':
         index_sparse(args.max_workers)

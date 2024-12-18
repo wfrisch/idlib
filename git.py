@@ -8,6 +8,13 @@ import shutil
 from datetime import datetime, timezone, timedelta
 
 
+CommitInfo = collections.namedtuple('CommitInfo', ['commit_hash',
+                                                   'commit_time',
+                                                   'paths',
+                                                   'commit_desc'],
+                                    defaults=(None, None,))
+
+
 def is_git_repository(directory):
     if not os.path.isdir(directory):
         return False
@@ -21,11 +28,6 @@ def is_git_repository(directory):
 
 class GitException(Exception):
     pass
-
-
-CommitInfo = collections.namedtuple('CommitInfo',
-    ['commit_hash', 'commit_time', 'paths', 'commit_desc'],
-    defaults=(None,None,))
 
 
 class GitRepo:
@@ -59,7 +61,7 @@ class GitRepo:
         """List of commits for a file, including renames.
         Returns [(commit,path), (commit,path), ...]"""
         cmdline = self.gitcmd + ['log', '--pretty=format:%H', '--name-only',
-                  '--follow', '--diff-filter=AMR', '--', path]
+                                 '--follow', '--diff-filter=AMR', '--', path]
         proc = subprocess.run(cmdline, capture_output=True, text=True)
         chunks = proc.stdout.strip().split('\n\n')
         return [tuple(chunk.split('\n')) for chunk in chunks]
@@ -116,7 +118,7 @@ class GitRepo:
         root_commits = proc.stdout.splitlines()
         if len(root_commits) > 1:
             # multiple root commits are uncommon,
-            # but they do occur, for example in 
+            # but they do occur, for example in
             # https://github.com/google/googletest
             root_commits.sort(key=lambda c: self.datetime(c))
         return root_commits[0]
@@ -128,9 +130,9 @@ class GitRepo:
 
     def all_commits_with_metadata(self, path=None, describe=False) -> list[CommitInfo]:
         result = []
-        cmdline = self.gitcmd + ['log', '--all', '--name-only',
-                  '--date=iso', '--diff-filter=AMR', '--ignore-submodules',
-                  '-z']
+        cmdline = self.gitcmd + ['log', '--all', '--name-only', '--date=iso',
+                                 '--diff-filter=AMR', '--ignore-submodules',
+                                 '-z']
         if describe:
             cmdline += ['--format=format:%(describe:tags) %H %ad']
         else:
@@ -164,11 +166,12 @@ class GitRepo:
             match = re_line0.match(lines[0])
             if not match:
                 raise ValueError(f"ACWM({path}) unexpected line0: " + lines[0])
-            commit_desc = match.group('desc') # can be None
+            commit_desc = match.group('desc')  # can be None
             commit_hash = match.group('hash')
             commit_time = datetime.fromisoformat(match.group('date'))
             paths = list(filter(lambda line: len(line) > 0, lines[1:]))
-            result.append(CommitInfo(commit_hash, commit_time, paths, commit_desc))
+            result.append(CommitInfo(commit_hash, commit_time, paths,
+                                     commit_desc))
         return result
 
 # vim:set expandtab tabstop=4 shiftwidth=4 softtabstop=4 nowrap:
