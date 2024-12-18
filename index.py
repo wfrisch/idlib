@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS libraries (  -- not implemented
 '''
 
 
+# CLI
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", help="database path. Default: ./idlib.sqlite",
                     dest="db", default='idlib.sqlite')
@@ -65,6 +66,8 @@ if args.library:
 else:
     libraries = config.libraries
 
+
+# Sanity check
 if len(libraries) == 0:
     print("No libraries found.", file=sys.stderr)
     sys.exit(1)
@@ -83,10 +86,13 @@ for lib in libraries:
 print()
 
 
+# Setup database
 con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
+git = None  # set by the initializer of each forked worker process
 
 
+# Functions
 def get_filerecords(lib_name, commitinfo):
     global git
     result = []
@@ -113,14 +119,13 @@ def get_filerecords(lib_name, commitinfo):
     return result
 
 
-def process_init(repo_path):
-    global git
-    git = GitRepo(repo_path)
-
-
-def get_all_filerecords_parallel(repo_path, lib_name, commitinfos,
-                                 max_workers):
+def get_all_filerecords(repo_path, lib_name, commitinfos, max_workers):
     result = []
+
+    def process_init(repo_path):
+        global git
+        git = GitRepo(repo_path)
+
     with ProcessPoolExecutor(max_workers=max_workers,
                              initializer=process_init,
                              initargs=(repo_path,)) as executor:
@@ -142,9 +147,8 @@ def index_full(max_workers):
         for ci in commitinfos:
             num_files += len(ci.paths)
         print(f"- found {num_files} files in {len(commitinfos)} commits")
-        filerecords = get_all_filerecords_parallel(lib.path, lib.name,
-                                                   commitinfos,
-                                                   max_workers=max_workers)
+        filerecords = get_all_filerecords(lib.path, lib.name, commitinfos,
+                                          max_workers=max_workers)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
         cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''',
@@ -164,13 +168,13 @@ def index_sparse(max_workers):
             commitinfos = git.all_commits_with_metadata(path=p)
             print(f"- found {len(commitinfos)} versions of {p}")
             sys.stdout.flush()
-            filerecords += get_all_filerecords_parallel(lib.path, lib.name,
-                                                        commitinfos,
-                                                        max_workers=max_workers)
+            filerecords += get_all_filerecords(lib.path, lib.name, commitinfos,
+                                               max_workers=max_workers)
         print(f"- total {len(filerecords)} files")
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', filerecords)
+        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''',
+                        filerecords)
         con.commit()
         print()
         sys.stdout.flush()
@@ -200,8 +204,8 @@ def prune():
                 to_delete.append((sha256, lib))
                 print(f"    - delete in {a_lib}: {sha256} {path}")
             for sha256, lib in to_delete:
-                cur.execute(
-                        "DELETE FROM files WHERE sha256 = ? AND library = ?", (sha256, lib))
+                cur.execute("DELETE FROM files"
+                            "WHERE sha256 = ? AND library = ?", (sha256, lib))
     con.commit()
 
     print("- delete remaining duplicates: (check this list carefully)")
@@ -227,6 +231,7 @@ def prune():
     con.commit()
 
 
+# Main
 if not args.prune_only:
     if args.mode == 'sparse':
         index_sparse(args.max_workers)
