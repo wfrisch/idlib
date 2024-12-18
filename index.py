@@ -151,8 +151,8 @@ def index_full(max_workers):
                                                    max_workers=max_workers)
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for fr in filerecords:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', fr)
+        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''',
+                        filerecords)
         con.commit()
         print()
         sys.stdout.flush()
@@ -174,8 +174,7 @@ def index_sparse(max_workers):
         print(f"- total {len(filerecords)} files")
         cur = con.cursor()
         cur.execute('DELETE FROM files WHERE library = ?', (lib.name,))
-        for fr in filerecords:
-            cur.execute('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', fr)
+        cur.executemany('''INSERT INTO files VALUES (?,?,?,?,?,?,?)''', filerecords)
         con.commit()
         print()
         sys.stdout.flush()
