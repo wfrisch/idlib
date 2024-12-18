@@ -13,10 +13,6 @@ from git import GitRepo
 import config
 
 
-def libpath(lib):
-    return Path("libraries") / lib.name
-
-
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
     sha256      TEXT,
@@ -45,6 +41,7 @@ FileRecord = collections.namedtuple('FileRecord', ['sha256',
                                                    'commit_desc',
                                                    'path',
                                                    'size', ])
+
 
 
 parser = argparse.ArgumentParser()
@@ -76,7 +73,7 @@ if len(libraries) == 0:
 for lib in libraries:
     print(f"Checking configuration for {lib.name:15s} ", end='')
     try:
-        git = GitRepo(libpath(lib))
+        git = GitRepo(lib.path)
     except ValueError as e:
         print(e)
         sys.exit(1)
@@ -139,14 +136,14 @@ def index_full(max_workers):
     for lib in libraries:
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
-        git = GitRepo(libpath(lib))
+        git = GitRepo(lib.path)
         print("- fetching list of all commits")
         commitinfos = git.all_commits_with_metadata()
         num_files = 0
         for ci in commitinfos:
             num_files += len(ci.paths)
         print(f"- found {num_files} files in {len(commitinfos)} commits")
-        filerecords = get_all_filerecords_parallel(libpath(lib), lib.name,
+        filerecords = get_all_filerecords_parallel(lib.path, lib.name,
                                                    commitinfos,
                                                    max_workers=max_workers)
         cur = con.cursor()
@@ -162,13 +159,13 @@ def index_sparse(max_workers):
     for lib in libraries:
         print(f"Indexing library: {lib.name}")
         sys.stdout.flush()
-        git = GitRepo(libpath(lib))
+        git = GitRepo(lib.path)
         filerecords = []
         for p in lib.sparse_paths:
             commitinfos = git.all_commits_with_metadata(path=p)
             print(f"- found {len(commitinfos)} versions of {p}")
             sys.stdout.flush()
-            filerecords += get_all_filerecords_parallel(libpath(lib), lib.name,
+            filerecords += get_all_filerecords_parallel(lib.path, lib.name,
                                                         commitinfos,
                                                         max_workers=max_workers)
         print(f"- total {len(filerecords)} files")
