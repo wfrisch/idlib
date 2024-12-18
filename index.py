@@ -197,19 +197,29 @@ def prune():
         for b_lib in b_libs:
             print(f"  - {a_lib} -= {b_lib}")
             to_delete = []
-            rows = cur.execute('''SELECT a.library, a.sha256, a.path FROM files a JOIN files b ON a.sha256 = b.sha256 WHERE a.library = ? AND b.library = ?;''', (a_lib, b_lib))
+            rows = cur.execute(
+                    "SELECT a.library, a.sha256, a.path FROM files a "
+                    "JOIN files b ON a.sha256 = b.sha256 "
+                    "WHERE a.library = ? AND b.library = ?;",
+                    (a_lib, b_lib))
             for row in rows:
                 lib, sha256, path = row
                 to_delete.append((sha256, lib))
                 print(f"    - delete in {a_lib}: {sha256} {path}")
             for sha256, lib in to_delete:
-                cur.execute("DELETE FROM files WHERE sha256 = ? AND library = ?", (sha256, lib))
+                cur.execute(
+                        "DELETE FROM files WHERE sha256 = ? AND library = ?", (sha256, lib))
     con.commit()
 
     print("- delete remaining duplicates: (check this list carefully)")
     cur = con.cursor()
     to_delete = []
-    rows = cur.execute('''SELECT a.library,b.library,a.sha256,a.path FROM files a JOIN (SELECT sha256,library,path,COUNT(*) c FROM files GROUP BY sha256 HAVING c > 1) b ON a.sha256 = b.sha256 WHERE a.library != b.library AND a.size > 0 ORDER BY a.library DESC;''')
+    rows = cur.execute(
+            "SELECT a.library, b.library, a.sha256, a.path FROM files a "
+            "JOIN (SELECT sha256,library,path,COUNT(*) c FROM files "
+            "GROUP BY sha256 HAVING c > 1) b ON a.sha256 = b.sha256 "
+            "WHERE a.library != b.library AND a.size > 0 "
+            "ORDER BY a.library DESC;")
     for row in rows:
         a_lib, b_lib, sha256, a_path = row
         to_delete.append(sha256)
