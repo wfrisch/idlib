@@ -33,17 +33,21 @@ jobs:
     - name: Index (sparse)
       run: python3 index.py -d idlib.sqlite
 
-    - name: Index (full)
-      run: |
-        python3 index.py -m full --no-prune -d idlib-full-unpruned.sqlite
-        cp idlib-full-unpruned.sqlite idlib-full.sqlite
-        python3 index.py --prune-only -d idlib-full.sqlite
+    # - name: Index (full)
+    #   run: |
+    #     python3 index.py -m full --no-prune -d idlib-full-unpruned.sqlite
+    #     cp idlib-full-unpruned.sqlite idlib-full.sqlite
+    #     python3 index.py --prune-only -d idlib-full.sqlite
 
-    - name: Compress databases
+    # - name: Compress databases
+    #   run: |
+    #     zstd -10 -k idlib.sqlite
+    #     zstd -10 -k idlib-full.sqlite
+    #     zstd -10 -k idlib-full-unpruned.sqlite
+
+    - name: Compress database
       run: |
         zstd -10 -k idlib.sqlite
-        zstd -10 -k idlib-full.sqlite
-        zstd -10 -k idlib-full-unpruned.sqlite
 
     - name: Create Release
       id: create_release
@@ -66,22 +70,22 @@ jobs:
         asset_name: idlib.sqlite.zst
         asset_content_type: application/octet-stream
 
-    - name: Upload idlib-full-unpruned.sqlite.zst
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./idlib-full-unpruned.sqlite.zst
-        asset_name: idlib-full-unpruned.sqlite.zst
-        asset_content_type: application/octet-stream
+    # - name: Upload idlib-full-unpruned.sqlite.zst
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./idlib-full-unpruned.sqlite.zst
+    #     asset_name: idlib-full-unpruned.sqlite.zst
+    #     asset_content_type: application/octet-stream
 
-    - name: Upload idlib-full.sqlite.zst
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./idlib-full.sqlite.zst
-        asset_name: idlib-full.sqlite.zst
-        asset_content_type: application/octet-stream
+    # - name: Upload idlib-full.sqlite.zst
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./idlib-full.sqlite.zst
+    #     asset_name: idlib-full.sqlite.zst
+    #     asset_content_type: application/octet-stream
