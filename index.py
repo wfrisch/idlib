@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import argparse
 import collections
 import concurrent.futures
@@ -12,6 +11,15 @@ import sys
 from git import GitRepo
 import config
 
+
+# Types
+FileRecord = collections.namedtuple('FileRecord', ['sha256',
+                                                   'library',
+                                                   'commit_hash',
+                                                   'commit_time',
+                                                   'commit_desc',
+                                                   'path',
+                                                   'size', ])
 
 SCHEMA = '''
 CREATE TABLE IF NOT EXISTS files (
@@ -33,15 +41,6 @@ CREATE TABLE IF NOT EXISTS libraries (  -- not implemented
     summary     TEXT      -- short summary of the library
 );
 '''
-
-FileRecord = collections.namedtuple('FileRecord', ['sha256',
-                                                   'library',
-                                                   'commit_hash',
-                                                   'commit_time',
-                                                   'commit_desc',
-                                                   'path',
-                                                   'size', ])
-
 
 
 parser = argparse.ArgumentParser()

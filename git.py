@@ -8,6 +8,11 @@ import shutil
 from datetime import datetime, timezone, timedelta
 
 
+CommitInfo = collections.namedtuple('CommitInfo',
+    ['commit_hash', 'commit_time', 'paths', 'commit_desc'],
+    defaults=(None,None,))
+
+
 def is_git_repository(directory):
     if not os.path.isdir(directory):
         return False
@@ -21,11 +26,6 @@ def is_git_repository(directory):
 
 class GitException(Exception):
     pass
-
-
-CommitInfo = collections.namedtuple('CommitInfo',
-    ['commit_hash', 'commit_time', 'paths', 'commit_desc'],
-    defaults=(None,None,))
 
 
 class GitRepo:
