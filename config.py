@@ -1124,6 +1124,17 @@ libraries = [
         "tinyxml2.h",
         "tinyxml2.cpp"
         ]),
+    Library('tz', [
+        "zic.c",
+        "localtime.c",
+        "zdump.c",
+        "private.h",
+        "date.c",
+        "strftime.c",
+        "tzfile.h",
+        "asctime.c",
+        "difftime.c",
+    ]),
     Library('uthash', [
         "src/uthash.h",
         "src/utlist.h",

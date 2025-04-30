@@ -270,3 +270,6 @@
 [submodule "libraries/popt"]
 	path = libraries/popt
 	url = https://github.com/rpm-software-management/popt
+[submodule "libraries/tz"]
+	path = libraries/tz
+	url = https://github.com/eggert/tz
