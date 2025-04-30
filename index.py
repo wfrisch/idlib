@@ -3,6 +3,7 @@ import argparse
 import collections
 import concurrent.futures
 from concurrent.futures import ProcessPoolExecutor
+import datetime
 import hashlib
 import multiprocessing
 import sqlite3
@@ -89,6 +90,8 @@ print()
 # Setup database
 con = sqlite3.connect(args.db)
 cur = con.executescript(SCHEMA)
+sqlite3.register_adapter(datetime.datetime, lambda dt: dt.isoformat())
+
 git = None  # set by the initializer of each forked worker process
 
 
