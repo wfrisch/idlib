@@ -2,7 +2,7 @@
 
 idlib finds embedded copies of C/C++ libraries in open-source packages.
 
-## Usage example
+## Usage
 ```
 # Download the latest database
 wget -O- https://github.com/wfrisch/idlib/releases/latest/download/idlib.sqlite.zst |zstdcat > idlib.sqlite
@@ -17,6 +17,8 @@ libuv v1.44.0-5-gbae2992c
 zlib v1.2.12-30-ga9e14e8
 zstd 0^20210512.c730b8c5a38b9e93efc0c3639e26f18f14b82f95
 ```
+
+We maintain a [weekly scan of openSUSE](https://github.com/wfrisch/idlib_results/blob/main/openSUSE.csv).
 
 ## Implementation
 At its core, idlib relies on a lookup table that associates a file's SHA-256
