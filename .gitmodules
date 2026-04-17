@@ -273,3 +273,6 @@
 [submodule "libraries/tz"]
 	path = libraries/tz
 	url = https://github.com/eggert/tz
+[submodule "libraries/cpp-httplib"]
+	path = libraries/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib

@@ -177,6 +177,9 @@ libraries = [
         "unzcrash.c",
         "mk251.c",
         ]),
+    Library('cpp-httplib', [
+        "httplib.h",
+        ]),
     Library('curl', [
         "lib/url.c",
         "lib/urldata.h",
